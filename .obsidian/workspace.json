@@ -51,12 +51,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "documentacao/O que foi feito/Main.py.md",
+                "file": "documentacao/O que foi feito/ia.py.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Main.py"
+              "title": "ia.py"
             }
           }
         ],
@@ -200,8 +200,8 @@
                 "showSearch": false,
                 "searchQuery": ""
               },
-              "icon": "lucide-archive",
-              "title": "Todas as propriedades"
+              "icon": "lucide-ghost",
+              "title": "all-properties"
             }
           }
         ]
@@ -224,23 +224,23 @@
   },
   "active": "94288cad00e3142f",
   "lastOpenFiles": [
-    "documentacao/O que foi feito/configurações gerais.md",
     "documentacao/O que foi feito/Main.py.md",
     "documentacao/O que foi feito/mqtt.py.md",
-    "documentacao/O que foi feito/websocket.py.md",
+    "documentacao/O que foi feito/configurações gerais.md",
+    "FastAPI_do_zero/Parte 1 - Configurando o ambiente de desenvolvimento/5. Instalando as ferramentas de desenvolvimento.md",
+    "FastAPI_do_zero/Parte 1 - Configurando o ambiente de desenvolvimento/4.  Primeira execução de um \"Hello, World!\".md",
+    "FastAPI_do_zero/Parte 1 - Configurando o ambiente de desenvolvimento/3. Criando um projeto.md",
     "documentacao/O que foi feito/ia.py.md",
+    "documentacao/O que foi feito/websocket.py.md",
+    "documentacao/UML.svg",
+    "documentacao/Manual.md",
     "documentacao/O que foi feito",
     "backend/app/app/ia.py",
     "backend/app/app/websocket.py",
     "backend/app/app/mqtt.py",
-    "documentacao/Manual.md",
     "Curso APIs com Python/Testes/Testes (parte mais prática).md",
     "Curso APIs com Python/Testes/Testes (coisas básicas).md",
-    "documentacao/UML.svg",
     "FastAPI_do_zero/Parte 1 - Configurando o ambiente de desenvolvimento/6. Configurando as ferramentas de desenvolvimento.md",
-    "FastAPI_do_zero/Parte 1 - Configurando o ambiente de desenvolvimento/5. Instalando as ferramentas de desenvolvimento.md",
-    "FastAPI_do_zero/Parte 1 - Configurando o ambiente de desenvolvimento/4.  Primeira execução de um \"Hello, World!\".md",
-    "FastAPI_do_zero/Parte 1 - Configurando o ambiente de desenvolvimento/3. Criando um projeto.md",
     "FastAPI_do_zero/Parte 1 - Configurando o ambiente de desenvolvimento/2. Instalando as dependências.md",
     "Dicionário.md",
     "HTTP.md",
@@ -262,7 +262,6 @@
     "documentacao",
     "jshdjsh/documentacao/UML.svg",
     "jshdjsh/documentacao/O que foi feito.md",
-    "jshdjsh/documentacao/Manual.md",
     "Backend_metaverso/documentacao/UML.svg",
     "Untitled diagram-2025-11-27-124822.svg",
     "Imagens/Captura de Tela 2025-11-25 às 17.46.47.png",
