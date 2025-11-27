@@ -1,0 +1,8 @@
+- Protocolo de transferência de hipertexto
+- Responsável pela comunicação cliente -> servidor
+- O protocolo HTTP em si não guarda estados anteriores (cada requisição é individual e não há memória para isso)
+- HTTPS é o protocolo HTTP com criptografia (usado quando se trata de dados pessoais) 
+- Comunicação entre front e backend
+- A vantagem do Websocket sob o HTTP é que ele guarda estados
+- Caso o HTTP for usado é interessante ter um banco de dados para guardar estados
+- Aplicação perfeita para gêmeos digitais: MQTT > FastAPI > WebSocket

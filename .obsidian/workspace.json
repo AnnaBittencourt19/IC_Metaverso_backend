@@ -1,0 +1,274 @@
+{
+  "main": {
+    "id": "3b4e18e8724a1142",
+    "type": "split",
+    "children": [
+      {
+        "id": "c312371392cd68fc",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "59f53a646e7ff7a1",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "FastAPI do zero!/5. Instalando as ferramentas de desenvolvimento.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "5. Instalando as ferramentas de desenvolvimento"
+            }
+          },
+          {
+            "id": "144eb0538e1d48b6",
+            "type": "leaf",
+            "state": {
+              "type": "image",
+              "state": {
+                "file": "Imagens/Captura de Tela 2025-11-08 às 21.34.47.png"
+              },
+              "icon": "lucide-image",
+              "title": "Captura de Tela 2025-11-08 às 21.34.47"
+            }
+          },
+          {
+            "id": "901d514533849151",
+            "type": "leaf",
+            "state": {
+              "type": "image",
+              "state": {
+                "file": "Imagens/Captura de Tela 2025-11-10 às 15.45.32.png"
+              },
+              "icon": "lucide-image",
+              "title": "Captura de Tela 2025-11-10 às 15.45.32"
+            }
+          },
+          {
+            "id": "94288cad00e3142f",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "documentacao/O que foi feito/Main.py.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Main.py"
+            }
+          }
+        ],
+        "currentTab": 3
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "aa85355a1cafebde",
+    "type": "split",
+    "children": [
+      {
+        "id": "52704c43bdd63175",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "7cf812c8ab452844",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Explorador de arquivos"
+            }
+          },
+          {
+            "id": "587b373c04a83ede",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Procurar"
+            }
+          },
+          {
+            "id": "c8b987f69bf2702d",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Marcadores"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "3b18a715c1d37aea",
+    "type": "split",
+    "children": [
+      {
+        "id": "fcc3fe0636e96da2",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "f48854367202e5ca",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "FastAPI do zero!/Parte 2 - Introdução ao desenvolvimento web/8. Introdução ao desenvolvimento web.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Links inversos para 8. Introdução ao desenvolvimento web"
+            }
+          },
+          {
+            "id": "379e644c98d90baf",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "FastAPI do zero!/5. Instalando as ferramentas de desenvolvimento.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Links de saída para 5. Instalando as ferramentas de desenvolvimento"
+            }
+          },
+          {
+            "id": "07532a0a5c7a214b",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "b71cc3b16715cda8",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "FastAPI do zero!/5. Instalando as ferramentas de desenvolvimento.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Sumário de 5. Instalando as ferramentas de desenvolvimento"
+            }
+          },
+          {
+            "id": "bc62a1cc69c991f8",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "Todas as propriedades"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 200,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Abrir a troca rápida": false,
+      "graph:Abrir visualização em gráfico": false,
+      "canvas:Criar novo canvas": false,
+      "daily-notes:Abrir a nota de hoje": false,
+      "templates:Inserir modelo": false,
+      "command-palette:Abrir paleta de comandos": false,
+      "bases:Criar nova base": false
+    }
+  },
+  "active": "94288cad00e3142f",
+  "lastOpenFiles": [
+    "documentacao/O que foi feito/configurações gerais.md",
+    "documentacao/O que foi feito/Main.py.md",
+    "documentacao/O que foi feito/mqtt.py.md",
+    "documentacao/O que foi feito/websocket.py.md",
+    "documentacao/O que foi feito/ia.py.md",
+    "documentacao/O que foi feito",
+    "backend/app/app/ia.py",
+    "backend/app/app/websocket.py",
+    "backend/app/app/mqtt.py",
+    "documentacao/Manual.md",
+    "Curso APIs com Python/Testes/Testes (parte mais prática).md",
+    "Curso APIs com Python/Testes/Testes (coisas básicas).md",
+    "documentacao/UML.svg",
+    "FastAPI_do_zero/Parte 1 - Configurando o ambiente de desenvolvimento/6. Configurando as ferramentas de desenvolvimento.md",
+    "FastAPI_do_zero/Parte 1 - Configurando o ambiente de desenvolvimento/5. Instalando as ferramentas de desenvolvimento.md",
+    "FastAPI_do_zero/Parte 1 - Configurando o ambiente de desenvolvimento/4.  Primeira execução de um \"Hello, World!\".md",
+    "FastAPI_do_zero/Parte 1 - Configurando o ambiente de desenvolvimento/3. Criando um projeto.md",
+    "FastAPI_do_zero/Parte 1 - Configurando o ambiente de desenvolvimento/2. Instalando as dependências.md",
+    "Dicionário.md",
+    "HTTP.md",
+    "FastAPI_do_zero/Parte 2 - Introdução ao desenvolvimento web/8. Introdução ao desenvolvimento web.md",
+    "Curso APIs com Python/Ferramentas de desenvolvedor/3. Configurando um ambiente virtual.md",
+    "Curso APIs com Python/Ferramentas de desenvolvedor/2. Requisições com Postman.md",
+    "boas praticas API.jpeg",
+    "Plano de estudo.md",
+    "FastAPI_do_zero/Estudos.md",
+    "FastAPI_do_zero/Erros e como resolver.md",
+    "FastAPI + WebSocket/Estudos.md",
+    "FastAPI_do_zero/Parte 1 - Configurando o ambiente de desenvolvimento/7. Testando o hello world.md",
+    "backend/app/poetry.lock",
+    "FastAPI_do_zero/1. Objetivo do curso.md",
+    "backend_metaverso",
+    "backend_metaveros",
+    "pasta sem título",
+    "backend_metaverso/app",
+    "documentacao",
+    "jshdjsh/documentacao/UML.svg",
+    "jshdjsh/documentacao/O que foi feito.md",
+    "jshdjsh/documentacao/Manual.md",
+    "Backend_metaverso/documentacao/UML.svg",
+    "Untitled diagram-2025-11-27-124822.svg",
+    "Imagens/Captura de Tela 2025-11-25 às 17.46.47.png",
+    "Imagens/Captura de Tela 2025-11-25 às 17.46.38.png",
+    "Imagens/Captura de Tela 2025-11-25 às 17.46.31.png",
+    "Imagens/Captura de Tela 2025-11-25 às 17.46.21.png",
+    "Imagens/Captura de Tela 2025-11-25 às 17.46.09.png"
+  ]
+}

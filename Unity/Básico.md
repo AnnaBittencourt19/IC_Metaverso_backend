@@ -1,0 +1,12 @@
+- Estrutura do editor:
+	- Assets são scripts, modelos 3D, texturas, cenas...
+	- Hierarchy: é tudo que existe na cena especifica que estou
+	- Scene: Onde os objetos são posicionados (visão de arquiteto)
+	- Game: Ver rodando
+	- Inspector: Quando clicamos em um objeto do jogo o inspetor mostra os componentes ou propriedades dos objetos
+
+- Coisas importantes para o projeto: 
+	- GameObject: É uma entidade que compõe o jogo (AvatarProfessor, LuzLaboratorio,etc)
+	- Component: É o que faz um objeto do jogo fazer algo, um avatar precisa de um componente 3D para ter uma aparência
+	- Script (C#): Anexa o script a um gameobject e consegue adicionar comportamentos a esse objeto (inteligencia para o objeto)
+	- 

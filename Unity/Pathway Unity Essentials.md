@@ -1,0 +1,3 @@
+- Ensina as habilidades essenciais para navegar no Editor Unity
+- Vai usar um playground como cenário
+- 

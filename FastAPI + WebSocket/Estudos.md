@@ -1,0 +1,3 @@
+ - [ ] https://fastapi.tiangolo.com/advanced/websockets/
+- [ ] https://medium.com/@bravekjh/integrating-unity-with-fastapi-via-websockets-for-ai-agents-and-reinforcement-learning-de7aa6ec22ff
+- [ ] https://github.com/zhiyuan8/FastAPI-websocket-tutorial

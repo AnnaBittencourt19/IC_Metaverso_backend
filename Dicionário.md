@@ -1,0 +1,28 @@
+- API: Usada para fazer a comunicação entre sistemas, o FastAPI define endpoints o Unity pode chamar e qual será a resposta
+- JSON: Formato usado para a troca de dados
+- Servidor: Recebe e responde requisições (fastAPI) 
+- UnityWebRequest: Função do Unity que faz chamadas HTTP
+- Framework: Esqueleto para construir p servidor do zero 
+- Endpoint: Um endereço específico da API (/eventos) é uma url
+- Métodos HTTP: O que fazer no endpoint (GET/POST/DELETE)
+- WebSocket: Uma opção ao HTTP que funciona em tempo real
+- MQTT: O que vai ligar o FastAPI e algo físico (IoT)
+- RAG: Aprimorar um LLM com dados externos. Onde o modelo antes de responder recupera (retrival) informações relevantes dos PDFs
+- Embeddings: Converter texto em vetores (captura o significado de um texto)
+- Chunking: Divide documentos em pedaços menores (chunks) antes da geração dos embeddings
+- Cliente: O que cria requisições HTTP, Unity
+- UnityWebRequest: Criada para que o C# (a Unity) envie requisições para o servidor
+- CORS(Cross-Origin Resource Sharing): É usado para permitir que o Unity se comunique com a API
+- Endpoint: É uma rota. Um URL específico ligado a uma funcionalidade
+- Pydantic: Biblioteca do FastAPI que garante que os JSON recebidos e saída sigam um esquema, previne erros
+- SQLModel: SQLALchemy + Pydantic,  facilita a comunicação entre o código e o BD
+- Uvicorn/Gunicorn: Permite que o servidor gerencia múltiplos clientes de forma eficiente
+- Venv: Ambiente virutal para armazenar as dependências
+- Vector Store: É um banco de dados para armazenar e realizar buscas de similaridade sobre embeddings
+- Endpoint / rota: URL que possui uma funcionalidade (ex: POST /lab/ligar_luz)
+- GET: Ler
+- POST: Criar/ação
+- PUT/PATCH: Atualizar
+- DELETE: Apagar
+- Status codes: 200 OK, 201 Created, 400 bad request, 401 Unauthorized, 404 Not Found, 500 Internal Server Error
+- 

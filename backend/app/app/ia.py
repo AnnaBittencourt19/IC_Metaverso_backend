@@ -1,0 +1,1 @@
+#aqui vai ser construida a IA, a logica da ia 
