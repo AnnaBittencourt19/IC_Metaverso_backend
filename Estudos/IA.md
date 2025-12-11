@@ -13,5 +13,15 @@ query → embedding → FAISS → docs → prompt → LLM → resposta
 
 - Query: Input do usuário é multilingue, é a entrada do usuário (vai ser convertida em uma lista de vetores (os embeddings))
 #### Etapa de indexação e retrieval
+- Na etapa de indexação os pdfs se tornam pesquisáveis por meio de vetor de busca semântica
+- O parametro k recupera k documentos relevantes (se for definido como 4, vai retornar 4 documentos)
+- Existem dois casos/ambientes:
+	- **Cross-Language Information Retrieval**(CLIR): Quando se tem documentos monolíngues porém as consultas serão em um idioma diferente (pode se pensar nesse cenário para o nosso projeto porém os documentos não são monolingues, tem pdfs em inglês e em português)
+	- **Multi-lingual Information Retrieval**(MLIR): Uma base de conhecimento multilingue, documentos multilingues (se adequa melhor ao nosso caso)
+- Estratégias como traduzir os documentos ou a consulta não são eficazes para o nosso objetivo, termos técnicos podem se perder na tradução. Até o momento o que tem se mostrado ideal é o uso de um modelo multiligue (porém deve ser analisada sua precisão no inglês e no português)
+- Não é viável a tradução
+- DETECÇÃO DE IDIOMA
+- Para avaliar o desempenho de recuperação usamos as metricas: precisão e revocação (casos de teste: pergunta em português direcionada a um documento em português, pergunta em inglês direcionada a um documento em português, pergunta em ingles direcionada a um documento em ingles e pergunta em portugueses para um documento em ingles)
 
+- O modelo multilingue que será usado vai ser o mmbert por enquanto
 

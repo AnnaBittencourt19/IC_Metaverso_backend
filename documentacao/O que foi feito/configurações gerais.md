@@ -111,3 +111,11 @@ run = 'fastapi dev fast_zero/app.py'
 pre_test = 'task lint' 
 test = 'pytest -s -x --cov=fast_zero -vv' 
 post_test = 'coverage html'
+```
+8. Como rodar o servidor:
+```
+poetry install
+poetry shell
+
+uvicorn app.main:app --reload
+```
