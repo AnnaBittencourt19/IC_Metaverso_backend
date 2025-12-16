@@ -1,0 +1,36 @@
+{
+	"nodes":[
+		{"id":"4bc3b0c7f6c8f9ac","type":"text","text":"IA / RAG","x":-1680,"y":-280,"width":840,"height":480,"color":"3"},
+		{"id":"feccc86fbb0d36c9","type":"file","file":"documentacao/O que foi feito/ia.py.md","x":-1480,"y":-240,"width":400,"height":400},
+		{"id":"9ae03017275ca2e0","type":"text","text":"Armazenar rotas e estados","x":-640,"y":-280,"width":785,"height":480,"color":"2"},
+		{"id":"4f6a5961748dc089","type":"file","file":"documentacao/O que foi feito/postgreSQL.md","x":-400,"y":-240,"width":400,"height":400},
+		{"id":"1d15f76d5e63743a","type":"text","text":"Armazenar embeddings","x":-1680,"y":360,"width":780,"height":520,"color":"4"},
+		{"id":"d50f4fb9a5cc82da","type":"file","file":"documentacao/O que foi feito/vectorBD.md","x":-1460,"y":420,"width":400,"height":400},
+		{"id":"0c35bfdf2f8dd95b","type":"text","text":"Cliente","x":-310,"y":-2040,"width":1475,"height":758,"color":"6"},
+		{"id":"5b17ff822f6c7cbe","type":"text","text":"Unity","x":-200,"y":-1960,"width":1280,"height":600,"color":"1"},
+		{"id":"6fbcf5d0d4d34c12","type":"file","file":"Unity/Básico.md","x":-40,"y":-1861,"width":400,"height":400},
+		{"id":"394fa1fc7ca9c89b","type":"file","file":"Unity/Pathway Unity Essentials.md","x":560,"y":-1860,"width":400,"height":400},
+		{"id":"fcc5449aa9c4ae1b","type":"text","text":"Servidor\n","x":-1412,"y":-1160,"width":1165,"height":720,"color":"6"},
+		{"id":"535ccd971b72a106","type":"text","text":"Fast API (main.py)","x":-1297,"y":-1091,"width":960,"height":541,"color":"5"},
+		{"id":"363eb3030d517fb2","type":"file","file":"documentacao/O que foi feito/Main.py.md","x":-977,"y":-1020,"width":400,"height":400},
+		{"id":"497ad10cf00b79bf","type":"text","text":"Servidor\n","x":1080,"y":-1180,"width":1400,"height":760,"color":"6"},
+		{"id":"0ad257eccf68d55c","type":"file","file":"documentacao/O que foi feito/websocket.py.md","x":1400,"y":-1060,"width":760,"height":520},
+		{"id":"fc9d107ea6923832","type":"text","text":"Protocolo/comunicação IoT","x":1020,"y":-240,"width":760,"height":600,"color":"#6d6bdb"},
+		{"id":"e6ee913782c7b9fe","type":"file","file":"documentacao/O que foi feito/mqtt.py.md","x":1200,"y":-140,"width":400,"height":400}
+	],
+	"edges":[
+		{"id":"714700919575b7d8","fromNode":"394fa1fc7ca9c89b","fromSide":"left","toNode":"6fbcf5d0d4d34c12","toSide":"right"},
+		{"id":"8afaefe068ac1e13","fromNode":"6fbcf5d0d4d34c12","fromSide":"right","toNode":"394fa1fc7ca9c89b","toSide":"left"},
+		{"id":"a53ff66d892590ed","fromNode":"4bc3b0c7f6c8f9ac","fromSide":"bottom","toNode":"1d15f76d5e63743a","toSide":"top"},
+		{"id":"abe7ca3ff5602bb6","fromNode":"0c35bfdf2f8dd95b","fromSide":"left","toNode":"fcc5449aa9c4ae1b","toSide":"top"},
+		{"id":"9820afa240a30fd2","fromNode":"fcc5449aa9c4ae1b","fromSide":"top","toNode":"0c35bfdf2f8dd95b","toSide":"left"},
+		{"id":"f25b26cbbb222a78","fromNode":"fcc5449aa9c4ae1b","fromSide":"bottom","toNode":"4bc3b0c7f6c8f9ac","toSide":"top"},
+		{"id":"deb9950e1e471011","fromNode":"0c35bfdf2f8dd95b","fromSide":"right","toNode":"497ad10cf00b79bf","toSide":"top"},
+		{"id":"a19de266334a620c","fromNode":"497ad10cf00b79bf","fromSide":"bottom","toNode":"fc9d107ea6923832","toSide":"top"},
+		{"id":"ff70c5ec942706cd","fromNode":"497ad10cf00b79bf","fromSide":"top","toNode":"0c35bfdf2f8dd95b","toSide":"right"},
+		{"id":"779daf999ec00c64","fromNode":"fc9d107ea6923832","fromSide":"top","toNode":"497ad10cf00b79bf","toSide":"bottom"},
+		{"id":"cc92cd10568f0134","fromNode":"fcc5449aa9c4ae1b","fromSide":"bottom","toNode":"9ae03017275ca2e0","toSide":"top"},
+		{"id":"c81f144eacb868db","fromNode":"fc9d107ea6923832","fromSide":"left","toNode":"0c35bfdf2f8dd95b","toSide":"bottom"},
+		{"id":"c9b090dc5d545e3e","fromNode":"0c35bfdf2f8dd95b","fromSide":"bottom","toNode":"fc9d107ea6923832","toSide":"left"}
+	]
+}

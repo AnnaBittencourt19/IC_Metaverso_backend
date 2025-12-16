@@ -37,30 +37,21 @@
             "id": "901d514533849151",
             "type": "leaf",
             "state": {
-              "type": "image",
+              "type": "canvas",
               "state": {
-                "file": "Imagens/Captura de Tela 2025-11-10 às 15.45.32.png"
+                "file": "Sem título 1.canvas",
+                "viewState": {
+                  "x": -700.7735493842982,
+                  "y": 376.1178302937193,
+                  "zoom": -2.0620352807829008
+                }
               },
-              "icon": "lucide-image",
-              "title": "Captura de Tela 2025-11-10 às 15.45.32"
-            }
-          },
-          {
-            "id": "94288cad00e3142f",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "documentacao/O que foi feito/ia.py.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "ia.py"
+              "icon": "lucide-layout-dashboard",
+              "title": "Sem título 1"
             }
           }
         ],
-        "currentTab": 3
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -222,8 +213,25 @@
       "bases:Criar nova base": false
     }
   },
-  "active": "94288cad00e3142f",
+  "active": "901d514533849151",
   "lastOpenFiles": [
+    "documentacao/Manual.md",
+    "Sem título 1.canvas",
+    "FastAPI_do_zero/1. Objetivo do curso.md",
+    "documentacao/O que foi feito/mqtt.py.md",
+    "documentacao/O que foi feito/websocket.py.md",
+    "documentacao/UML.svg",
+    "documentacao/O que foi feito/vectorBD.md",
+    "documentacao/O que foi feito/postgreSQL.md",
+    "Plano de estudo.md",
+    "HTTP.md",
+    "documentacao/O que foi feito/configurações gerais.md",
+    "documentacao/O que foi feito/Main.py.md",
+    "documentacao/O que foi feito/ia.py.md",
+    "Sem título 3.canvas",
+    "Sem título 2.canvas",
+    "Sem título.canvas",
+    "Imagens/Captura de Tela 2025-11-10 às 15.45.32.png",
     "Estudos/RAG.md",
     "backend/app/app/test_api.py",
     "backend/app/app/requirements.txt",
@@ -236,38 +244,25 @@
     "backend/app/app/ia_test.py",
     "backend/app/app/ia_improved.py",
     "Estudos/IA.md",
-    "documentacao/O que foi feito/configurações gerais.md",
-    "documentacao/O que foi feito/Main.py.md",
-    "documentacao/O que foi feito/ia.py.md",
     "backend/app/app/faiss_index.bin",
     "Captura de Tela 2025-12-11 às 15.19.52.png",
     "FastAPI_do_zero/Parte 1 - Configurando o ambiente de desenvolvimento/3. Criando um projeto.md",
     "FastAPI_do_zero/Parte 1 - Configurando o ambiente de desenvolvimento/4.  Primeira execução de um \"Hello, World!\".md",
     "FastAPI_do_zero/Parte 1 - Configurando o ambiente de desenvolvimento/2. Instalando as dependências.md",
     "Curso APIs com Python/Ferramentas de desenvolvedor/3. Configurando um ambiente virtual.md",
-    "documentacao/Manual.md",
     "Estudos/Como construir um RAG.md",
     "Captura de Tela 2025-12-10 às 13.10.03.png",
     "Revisões/Revisão 09-11-2025.md",
-    "documentacao/O que foi feito/mqtt.py.md",
-    "documentacao/O que foi feito/websocket.py.md",
-    "documentacao/UML.svg",
     "Estudos/XLM RoBERTa ou mmBERT.md",
     "Imagens/Captura de Tela 2025-12-01 às 11.02.46.png",
     "Building and evaluating multilingual RAG systems.md",
-    "FastAPI_do_zero/1. Objetivo do curso.md",
     "FastAPI_do_zero/Estudos.md",
     "FastAPI_do_zero/Parte 1 - Configurando o ambiente de desenvolvimento/5. Instalando as ferramentas de desenvolvimento.md",
     "Curso APIs com Python/Testes/Testes (parte mais prática).md",
-    "Curso APIs com Python/Testes/Testes (coisas básicas).md",
-    "FastAPI_do_zero/Parte 1 - Configurando o ambiente de desenvolvimento/6. Configurando as ferramentas de desenvolvimento.md",
-    "Dicionário.md",
-    "HTTP.md",
     "boas praticas API.jpeg",
     "jshdjsh/documentacao/UML.svg",
     "Backend_metaverso/documentacao/UML.svg",
     "Untitled diagram-2025-11-27-124822.svg",
-    "Imagens/Captura de Tela 2025-11-25 às 17.46.47.png",
-    "Imagens/Captura de Tela 2025-11-25 às 17.46.38.png"
+    "Imagens/Captura de Tela 2025-11-25 às 17.46.47.png"
   ]
 }
