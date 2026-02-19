@@ -1,0 +1,238 @@
+# Montagem do Drive
+![[Captura de Tela 2026-02-13 às 19.02.35.png]]
+- Os pdfs estão drive
+- Usar os arquivos do drive no colab 
+# Instalação de dependências
+![[Captura de Tela 2026-02-13 às 19.42.03.png]]
+- Vai para um arquivo requirement.txt futuramente 
+- Instalação de bibliotecas 
+- Pra que serve cada biblioteca:
+	- PyMuPDF: Para trabalhar com pdfs (leitura, extração de texto,etc)
+	- torch (PyTorch): Framework para aprendizado de máquina, construir e treinar a rede neural, também usada para operações com tensores
+	- numpy: Mexe com operações matemáticas
+	- sentence-transformers: Calcular embeddings 
+	- langchain: para usar os submodulos do langchain 
+	- langchain-text-splitters: para criar chunks
+	- langchain-core: manter os metadados para os chunks 
+	- langchain-huggingface: ara usar modelos que estão no hugging face e funcionalidades
+	- langchain-chroma: para usar o banco de dados vetorial (chromaDB)
+	- chromadb: gerenciar o banco de dados vetorial
+	- transformers: carregar o modelo pré-treinado e tokenizadores
+	- accelerate: para otimizar para hardware diferentes
+	- bitsandbytes: otimizar memória e velocidade
+	- unsloth: otimiza o treinamento de modelos de LLMs em GPUs (ficam mais rápidos)
+	- xformers: auxilia o unsloth
+# Importações![[Captura de Tela 2026-02-14 às 09.42.41.png]]
+- Bibliotecas e módulos
+- os: interagir com o sistema operacional
+- glob: encontrar arquivos usando o padrão * (qualquer sequência de caracteres)
+- fitz: PyMuPDF
+- logging: registrar informações (debug)
+- re: regex
+- unicodedata: normalizar texto
+- json: trabalhar com JSON
+- hashlib REMOVER
+- FastLanguageModel (unsloth): carregamento mais eficiente de LLMs
+- CrossEncoder (sentence_transformers): carrega modelos de reranking, avaliam a relevancia entre pergunta e o documento
+- RecursiveCharacterTextSplitter: criar chunks sem que eles percam a integridade semantica
+- Document: documento com o conteúdo da página e seus metadados
+- HuggingFaceEmbeddings: usar modelos do HuggingFace
+- Chroma: banco de dados vetorial
+- chromadb: gerenciar banco de dados vetorial
+
+# Definição de constantes e configurações globais
+![[Captura de Tela 2026-02-14 às 09.43.28.png]]
+- GPU é melhor para operações com tensores
+- Célula onde ficam as configurações e as constantes
+- O que significa cada linha:
+	- PDF_DIR: local no google drive onde os pdfs estão 
+	- CHROMA_PERSIST_DIR: local onde o banco de dados vetorial vai ser salvo 
+	- EMBEDDING_MODEL_NAME: nome do modelo de embedding (texto -> vetores, o que será armazenado no chroma) que vai ser usado. Foi escolhido o modelo intfloat/multilingual-e5-large por ele ser multilingue e ter bom desempenho tanto em inglês quanto em português 
+	- CROSS_ENCODER_MODEL: nome do modelo de reranking. Foi escolhido o modelo BAAI/bge-reranker-v2-m3 (reordena documentos com base na relevancia com a consulta)
+	- LLM_MODEL_NAME: nome da LLM pré-treinada que será usada para gerar as respostas. Foi escolhido o modelo unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit (ele apresentou bons resultados em vista de modelos testados anteriormente)
+	- MIN_CROSS_ENCODER_SCORE: pontuação minima para o reranker, abaixo disso o documento é descartado para a consulta em questão
+	- MIN_RELATIVE_SCORE: usada para filtrar documentos após o reranking
+	- MAX_CONTEXT_TOKENS: número máximo de tokens que o contexto da LLM pode ter
+	- Resumindo: Define caminhos, nome das "coisas" que serão usadas e as configurações de reranking e tokens
+
+# Funções de processamento de texto e extração de tabelas
+- Onde os pdfs serão processados para que os conteúdos deles estejam em um formato adequado para o LLM
+- Funções:
+	- **clean_text_content(text):**
+		![[Captura de Tela 2026-02-14 às 10.02.19.png]]
+		- Padroniza o texto extraído dos PDFs para facilitar a compreensão do LLM e a geração de embeddings
+		- text = unicodedata.normalize('NFKC', text): normaliza os caracteres (limpa inconsistências visuais que confundem o computador), existem diversos modos de uma coisa estar escrita em pdfs ou em sites, ou até mesmo na consulta do usuário. O NFKC padroniza caracteres que são visualmente diferentes que significam a mesma coisa, por exemplo: No pdf está escrito ¾ e o usuário escreve na consulta 3/4, o significado das suas coisas são iguais porém a máquina não entende que são iguais desse modo sem o uso do NFKC não seria possível encontrar o ¾  como relevante. Além disso, até acentos podem interferir na consulta e na geração de embeddings
+		- ext = re.sub(r'[ \t]+', ' ', text): organizar e padronizar os espaços, o re.sub é utilizado para fazer substituições no texto (equivale ao atalho ctrl+U no excel (Localizar e substituir)), oq ele está localizando são espaços ou tabulações ([/t]) que aparecem uma ou mais vezes (+) e substitui-las por apenas um espaço (' ')
+		- text = re.sub(r'\n{3,}', '\n\n', text): nesse caso o re.sub está procurando 3 ou mais ({3,})  quebras de linhas (\n) e vai substitui-las por 2 quebras de linhas (\n\n)
+		- lines = [line.strip() for line in text.split('\n') if line.strip()]:  remove linhas vazias 
+		- return '\n'.join(lines): utiliza o que o processo anterior retornou, junta essas frases por meio de quebra de linha (é como se transformasse uma lista em texto único)
+		- Resumindo: é onde o texto é processado para facilitar a geração de embeddings e a leitura para o LLM
+	
+	- **find_table_caption(page, table_bbox, max_distance=50):** ![[Captura de Tela 2026-02-14 às 10.51.36.png]]
+		- procura a legenda/título da tabela
+		- O text("blocks") gera uma lista de blocos e cada um desses blocos possui uma tupla (uma lista que não pode ser alterada) nesse modelo:  (x0, y0, x1, y1, text, block_no, block_type) (onde: x0 é a coordenada horizontal direita, y0 é a coordenada vertical superior, x1 é a coordenada horizontal direita, y1 é a coordenada vertical inferior, text é o conteudo textual do bloco, block_no é o índice do bloco e block_type o tipo do bloco)
+		- table_bbox: (x0,yo,x1,y1)
+		- text_blocks = page.get_text("blocks"): Separa o conteudo em blocos, cada bloco tem o seu conteúdo e sua coordenada
+		- table_top = table_bbox[1] : define onde a tabela começa (y0)
+		- for block in text_blocks: percorrer toda a tabela
+		- if len(block) >= 5: analisa se a tupla do bloco tem pelo menos 5 elementos (x0, y0, x1, y1, text, block_no, block_type) (ver se é um bloco válido)
+		- block_bottom = block[3] : o terceiro "elemento" de uma tupla é o y1 (a base do bloco, onde ele "termina")
+		- if 0 < (table_top - block_bottom) < max_distance: If para encontrar o texto acima da tabela, a parte table_top - block_bottom > 0 analisa se o texto está antes da tabela começar e o max distance (é 50px por padrão, foi definido nos parametros da função) é para que o texto não esteja muito longe da tabela, ou seja, analisa se há um texto acima da tabela e que não está longe dela
+		- text = block[4].strip(): esse trecho é para formatar o texto encontrado (o que faz sentido ser uma legenda), block[4] significa pegar o texto que está associado a esse bloco e o .strip() é um método que remove espaços do início e do fim de uma string (remove \n, \t, etc)
+		- if re.match(r'^(Tabela|Table|Quadro)\s*\d+', text, re.IGNORECASE): uso do regex para identificar se corresponde a uma legenda de tabelas (^Tabela|Table|Quadro significa começar com uma dessas palavras) (\s* 0 ou mais espaços)(\d+ 1 ou mais digitos) (text = vai usar o trecho encontrado anteriormente) (re.IGNORECASE = ignora letras maiusculas)
+		- return text: se todas as condições (ifs) forem verdadeiras retorna o texto, se não retorna 'none'
+		- Resumindo é uma função que procura a legenda de uma tabela, usando regex e blocos
+
+	- **sanitize_cell_content(cell_content)**
+		![[Captura de Tela 2026-02-17 às 13.11.44.png]]
+
+		- Serve para limpar e formatar o conteudo de uma celula na tabela para formato Markdown
+		- if cell_content is None: return "": verifica se o conteúdo da celula é nulo e se for retorna uma string vazia
+		- cell_str = str(cell_content).strip(): Converte o conteudo da celula para uma string (str(cell_content) e remove espaços em branco do início e do fim (strip())
+		- cell_str = cell_str.replace("\n", " ").replace("\r", " "): usa regex para substituir quebra de linha (\n) por 2 espaços e o que faz voltar para o começo da linha (margem esquerda)(\r) por um espaço
+		- cell_str = re.sub(r" \s* ", " ", cell_str): aqui é usado .sub do regex pois usamos uma expressão regular (\s*) que significa qualquer tipo de espaço uma ou mais vezes será substituido por apenas um espaço, o sub se torna mais poderoso nesse caso pelo uso do * (1 ou mais vezes) que procura espaços duplos, triplos...
+		- ``cell_str = cell_str.replace("|", "\\|"): `` o simbolo | muitas vezes é interpretado com o operador ou mas em tabelas ele é usado para separar, substituir ele por ``\\|``garante que não haja esse engano
+		- return cell_str: retorna a celula formatada
+	
+	- **extract_tables_markdown(tables, page_num, page=None)**![[Captura de Tela 2026-02-17 às 13.55.35.png]]
+		- converter uma tabela para o formato markdown
+		- table_text = "": inicializa uma string vazia
+		- if not tables: return table_text: Se nenhuma tabela for fornecida, retorna a string vazia
+		- for table_idx, table in enumerate(tables): percorre as tabelas (table_idx é o id da tabela, table é a tabela e o enumerate(tables) numera cada tabela)
+		- try: tentativa, o que o programa deve fazer (tentar fazer isso se não mostrar o que está no exception (erro ao processar tabela numero da tabela na pagina tal))
+		- caption = None: inicializa a variável onde a legenda vai ser armazenada
+		- if page and hasattr(table, 'bbox'): primeiro analisa se foi passado o objeto page para o função (devido ao uso da função find_table_caption que precisa analisar a pagina toda), depois usa hasattr (que equivale a tem o atributo). hasattr(table, 'bbox') significa: o objeto table tem o atributo bbox(coordenadas onde a tabela começa e termina)? 
+		- caption = find_table_caption(page, table.bbox): usa a função find_table_caption para associar uma legenda a tabela em questão
+		- table_data = table.extract(): em uma variavel chamada table_data é armazenada a "tradução" da tabela e passa para uma lista (identifica as divisões, lê o texto e organiza (agrupa e organiza os textos da tabela, pertence ao PyMuPDF))
+		- if not table_data or len(table_data) == 0: continue: caso a tabela que esteja sendo percorrida agora não tenha dados o programa pula para a próxima tabela
+		- num_cols = max(len(row) for row in table_data): procura a quantidade de colunas na maior linha (na linha que possui mais colunas) para normalizar todas as linhas com base na quantidade de colunas (usa o maior valor como numero padrão de colunas)
+		- normalized_data = [] : lista para guardar as linhas normalizadas
+		- for row in table_data: percorre linha por linha afim de normaliza-las 
+		- normalized_row = list(row) + [""] * (num_cols - len(row)): aqui é onde cada linha vai ser normalizada, em len(row) será contada quantas colunas a linha tem, o num_cols é o numero "padrão"definido anteriormente, em num_cols - len(row)) fazemos a subtração da quantidade ideal com a quantidade de colunas encontrada, caso falte uma coluna por exemplo ela será preenchida com um espaço ( list(row) (lista da linha) + [" "] ``*``(num_cols - len(row))(espaço vazio nos lugares sem coluna)
+		- normalized_data.append(normalized_row): adiciona a linha normalizada na lista normalized_data criada anteriormente 
+		-  is_definition_table = len(normalized_data) > 1 and num_cols >= 2:  checa se é uma tabela de definição horizontal (exemplo: a primeira coluna é a "âncora", o produto em questão, nos pdfs temos uma tabela que trata de IDs, ao olharmos ela horizontalmente podemos definir que os atributos após a coluna[0] são valores/caracteristicas da mesma), para testar se essa tabela é de definição horizontal analisa se ela tem mais de uma linha e pelo menos 2 colunas (onde a primeira é o item em questão)
+		- if is_definition_table: se a condição anterior for verdadeira
+		- header = f"**[{caption if caption else f'Tabela {table_idx + 1}'} - Página {page_num + 1}]**\n\n" : se foi encontrada uma legenda da tabela (find_table_caption) a tabela terá a legenda encontrada, se não sua legenda vai ser um nome automatico (exemplo: Tabela 1 - Página 2) (é para padronizar um nome e uma localização para que haja um metadado para que a fonte seja citada) (o f"[{}] é usado para "chamar" uma variavel em uma string)
+		- table_md = "": string vazia onde serão armazenadas as linhas da tabela (coluna por coluna)
+		- headers = [sanitize_cell_content(h) for h in normalized_data[0]]:  pega uma variavel chamada header  (que é uma lista), pega a primeira linha da tabela(cabeçalho), percorre cada célula dela (no caso cada coluna), utiliza as função normalized_data[0] (que formata as linhas) e sanitize_cell_content(h) (h é cada celula da primeira linha e o sanitize_cell_content limpa as celulas)
+		- for row in normalized_data[1:]: percorre todas as linhas na lista normalized_data (exceto o cabeçalho [1:], 1: significa a partir do indice 1)
+		- sanitized_cells = [sanitize_cell_content(cell) for cell in row]: limpa a célula (espaços duplos, quebra de linha) (nas linhas que não são o cabeçalho, o cabeçalho foi tratado na linha anterior)
+		- anchor = sanitized_cells[0] if sanitized_cells else "": pega a primeira celula da lista (sanitized_cells[0]) e coloca ela como ancora (tipo: ID 0, sobre o que a linha em questão se trata)
+		- attributes = []: uma lista vazia que vai guardar os atributos da ancora
+		- for i, attr in enumerate(sanitized_cells[1:], 1): pega os atributos da linha (sem ser a ancora), o enumerate ( ,1) significa que o indice vai começar a contar do 1 em vez do 0
+		- if attr.strip(): só inclui atributos não vazios
+		- header_name = headers[i] if i < len(headers) else "": significa: (valor_se_verdadeiro (header[i] if condição( i < len(headers)) else valor_se_falso("")).  Pegar o nome da coluna naquela posição sem dar erro se ela não existir.
+		- if header_name: se a condição anterior retornar true
+		- attributes.append(f"{header_name}: {attr}"): se tiver um nome de cabeçalho (valor da primeira linha naquela coluna) vai unir o cabeçalho com o atributo (valor) (exemplo: velocidade: 22km (onde velocidade é o header_name e 22km o attr(atributo)))
+		- else: attributes.append(attr): quando não tem nome na coluna coloca só o atributo mesmo
+		- if anchor.strip(): se após tirar os espaços (.strip()) archor ainda tiver um valor executar
+		- table_md += f"[{anchor}]: {" |".join(attributes)}\n" : formata, fica [ancora]: header: atributo | header: atributo ... (exemplo: [ID 0]: velocidade: 222km | atributo 2: 212) ([Âncora]: Nome do Cabeçalho 1: Atributo 1 | Nome do Cabeçalho 2: Atributo 2)
+		- table_text += f"\n{header}{table_md}\n": Adiciona a tabela formatada (adiciona a tabela formatada)
+		- else (se não for tabela de definição): sanitized_headers = [sanitize_cell_content(h) for h in normalized_data[0]]: pega a primeira linha da tabela, percorre as células(h) dessa linha, limpa o texto dessa célula(linha). O [] significa que é uma lista
+		- table_md = "| " + " | ".join(sanitized_headers) + " |\n":  cria os cabeçalhos em formato markdown(exemplo: nome | idade | curso)
+		- table_md += "|" + "|".join(["---"] * num_cols) + "|\n": cria a linha que separa o cabeçalho do resto da tabela no markdown. (|---|---|)
+		- for row in normalized_data[1:]: para cada linha em em normalized_data a partir da primeira (ou seja, exceto o cabeçalho)
+		- sanitized_cells = [sanitize_cell_content(cell) for cell in row]: limpar cada célula da linha antes de adicionar na tabela
+		- table_md += "| " + " | ".join(sanitized_cells) + " |\n": montar e adicionar cada linha da tabela no formato markdown (exemplo: | Anna | 22 | Engenharia)
+		- header = f"**[{caption if caption else f'Tabela {table_idx + 1}'} - Página {page_num + 1}]**\n\n":   se foi encontrada uma legenda da tabela (find_table_caption) a tabela terá a legenda encontrada, se não sua legenda vai ser um nome automatico (exemplo: Tabela 1 - Página 2) (é para padronizar um nome e uma localização para que haja um metadado para que a fonte seja citada) (o f"[{}] é usado para "chamar" uma variavel em uma string)
+		- except Exception as e: logging.error(f"Erro ao processar tabela {table_idx + 1} na página {page_num + 1}: {str(e)}") continue: captura um erro na tabela, registra ele e vai para a próxima tabela
+		- return table_text: o for table_idx, table in enumerate(tables) retorna a string completa contendo todas as tabelas em formato markdown
+		
+	- **chunk_documents(documents):**	![[Captura de Tela 2026-02-18 às 12.39.10.png]]
+		- cria os chunks (pedaços menores de texto) usa o RecursiveCharacterTextSplitter do LangChain
+		- chunks = []: lista para armazenar os chunks
+		- text_splitter = RecursiveCharacterTextSplitter(...): chama o RecursiveCharacterTextSplitter para dividir o texto 
+			- chunk_size=800: define o tamanho máximo (em caracteres) de cada chunk
+			- chunk_overlap=300: faz com que o próximo chunk comece com os 300 últimos caracteres do chunk anterior (para não ter perda de contexto)
+			- separators=[....] : para evitar "cortar" palavras no meio, vai usar essa lista em ordem para definir onde separar, primeiro tenta por quebra entre paragrafos(\n\n) e por último por espaço
+			- keep_separator=True: keep_separator é um parametro do RecursiveCharacterTextSplitter ele controla se os separadores devem ser mantidos ou não, nesse caso serão mantidos (true)
+		- for doc in documents: percorre cada documento que está dentro da lista documents
+			- doc_chunks = text_splitter.split_documents(...): divide um documento em vários pedaços (chunks) menores, text_splitter foi configurado anteriormente, split_documents divide o documento em pedaços menores
+			- [Document(page_content=doc['text'], metadata=doc['metadata'])] : passa a lista de documentos para o split documents (função/método do RecursiveCharacterTextSplitter para dividir documentos em chunks), page_content é o texto e o metadata são as informações extras, o resultado é salvo em doc_chunks
+			- chunks.extend(doc_chunks): adiciona todos os chunks criados na lista geral chunks (o extend é uma método próprio da estrutura List do Python que serve para adicionar elementos de outra lista em outra)
+		- filtered_chunks = [chunk for chunk in chunks if len(chunk.page_content.strip()) > 50]: cria uma nova lista com chunks que tem mais de 50 caracteres (filtra os chunks com conteudo) (chunk.page_content.strip: remove os espaços iniciais e finais do chunk que está sendo percorrido)
+		- print(f"Total de chunks gerados: {len(filtered_chunks)}"): imprime a quantidade de chunks gerados (válidos que foram filtrados)
+		- return filtered_chunks: a função retorna a lista de chunks flitrados
+
+# Funções de gerenciamento do banco de dados vetorial e expansão de consulta
+- configura o chromaDB e lida com a consulta de usuario (expande a consulta)
+- embeddings = chunks em formato vetorial (vetores numericos) (pro llm entender)
+- é basicamente o R da palavra RAG, a recuperação de informação
+- Funções: 
+	- **setup_vectorstore():**![[Captura de Tela 2026-02-18 às 14.00.49.png]]
+		- configura banco de dados vetorial 
+		- embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL_NAME,model_kwargs={'device': device}: cria um objeto(variavel) de embeddings usando um modelo do Hugging Face (no caso vai usar o modelo intfloat/multilingual-e5-large) e o model_kwargs é para executar o modelo no dispositivo definido (cpu ou cuda (gpu))
+		- client = chromadb.PersistentClient(path=CHROMA_PERSIST_DIR): cria um cliente (porta de acesso ao banco de dados), ser um PersistentClient() salva no disco em path=CHROMA_PERSIST_DIR (no caso uma pasta no drive)
+		- try: tenta executar o bloco que está dentro dele, se não executar vai para o except (usado quando já se tem a pasta com o banco de dados)
+			- collection = client.get_collection(name="6g_docs"): procura uma coleção chamada 6g_docs no chromaDB, caso essa coleção não exista vai para o except
+			- print(f"Carregando banco de dados existente com {collection.count()} documentos..."): retorna o número de embeddings encontrados na coleção encontrada
+			- vectorstore = Chroma(client=client, collection_name="6g_docs",embedding_function=embeddings): cria um objeto (vectorstore) do tipo chroma conectado com a coleção salva no chromaDB (a variavel criada guarda uma conexão entre chromaDB com o LangChain, uma ponte entre a coleção e métodos especificos do langchain)
+		- except Exception as e: usado quando o banco de dados não é encontrado, aí vai criar um
+			- documents = load_pdfs_improved(PDF_DIR): ler os pdfs (que estão em PDF_DIR) e formata-lo (usando a função oad_pdfs_improved)
+			- chunks = chunk_documents(documents): pega os documentos processados e os divide em chunks 
+			- vectorstore = Chroma.from_documents(chunks,embeddings, client=client,collection_name="6g_docs"): pega os chunks (pedaços), converte em vetores(embeddings), salva os vetores no disco(client) e define o nome da coleção como 6g_docs
+		- base_retriever = vectorstore.as_retriever(search_kwargs={'k': 8}): converte o vectorstore (banco vetorial) em um retriever(objeto do LangChain para busca em documentos usando uma consulta) que retorna os 8 chunks mais relevantes (k=8) para cada pergunta
+		- return base_retriever, embeddings: retorna o retriever e o modelo de embeddings
+	- **expand_query_with_embeddings(query, embeddings_model, vectorstore, max_expansions=3)**: ![[Captura de Tela 2026-02-18 às 15.02.49.png]]
+		- expande a consulta do usuário (query_expand)
+		- recebe os seguintes parametros: pergunta original do usuário(query), o modelo que gera os embeddings(embeddings_model), o banco vetorial(vectorstore) e o número maximo de termos adicionais (max_expansions=3)
+		- try: tenta executar esse bloco
+			- initial_results = vectorstore.similarity_search(query, k=20): chama o metodo similarity_search para o objeto vectorstore, esse metodo vai pegar a pergunta do usuario, converte ela em embedding, compara com os vetores do banco e retorna os 20 documentos mais similares
+			- candidate_terms = set(): inicializa um conjunto para armazenar os termos candidatos para aumentar a pergunta do usuario (o set é uma estrutura de dados que não permite termos duplicados)
+			- for doc in initial_results[:10]: pega os 10 primeiros ([:10]) documentos mais relevantes
+				- words = re.findall(r'\b[a-záàâãéêíóôõúç]{4,}\b', doc.page_content.lower()): o re.findall tem a seguinte estrutura (padrão_procurado, texto), ou seja vai procurar todas as palavras(a-z significa todas as letras minusculas e depois vem as letras acentuadas (procura letras minuculas com ou sem acento)) com 4 ou mais letras ({4,}), o .lower formata para que todas as palavras no doc.page_content (texto do chunk atual) sejam em letra minuscula. \b...\b indica inicio e fim da frase (words vai ser uma lista de strings com o conteúdo sendo palavras com 4 ou mais letras minusculas e com acentos, o re.findall retorna sempre uma lista com as correspondencias encontradas)
+				-  candidate_terms.update(words[:5]): anteriormente foi criado um set chamado candidate_terms, esse trecho atual vai adicionar os 5 primeiros termos encontrados (utilizando o re.findall) nesse set (candidate_terms), o .update é um metodo do set que adiciona todos os 5 elementos no set (é util pelo fato de que não ira repetir palavras (por ser set) e o update adiciona mais de um elemento por vez ([:5], no caso 5))
+			- query_embedding = embeddings_model.embed_query(query): transforma a query em um vetor (embedding) para que esses embeddings sejam comparados com os termos dos documentos (embeddings_model (modelo que vai gerar os embeddings), embed_query() é o metodo que vai transformar a query em embedding)
+			- term_scores = []: cria uma lista vazia para armazenar os termos e suas pontuações de similaridade
+			- for term in list(candidate_terms)[:50]: percorre os primeiros 50 termos "candidatos"
+				- if term not in query.lower(): analisa se o termo não está na pergunta (query), isso garante que não sejam adicionados termos que já estão na query
+					- term_embedding = embeddings_model.embed_query(term): vai transformar a palavra "candidata" (term) em um embedding (vetor numerico)
+					- similarity = np.dot(query_embedding, term_embedding) / ( np.linalg.norm(query_embedding) * np.linalg.norm(term_embedding) ): vai calcular a similaridade de cosseno entre o vetor da consulta do usuario(query_embedding) com o vetor do termo candidato(term_embedding), o resultado (similarity) vai dizer o quão semanticamente eles se parecem. np.dot calcula o produto escalar entre os os dois vetores (ponto) e o np.linalg.norm normaliza o vetor, considera apenas a direção do vetor (equivale a ||vetor||, tamanho do vetor, teorema de Pitagoras). Resumindo: vai fazer a conta (produto escalar entre os embeddings da query e dos termos) dividido por ((norma da query) * (norma do termo)). O resultado (similarity) é um valor entre -1 e 1 (onde 1 significa vetores alinhados(mesmo significado), 0 vetores sem relação (ortogonais) e -1 vetores opostos (significado oposto)) (resumindo: similarity mede o quanto  o termo candidato está semanticamente próximo da query)
+					- if similarity > 0.6: se a similaridade for maior que 0.6 (proxima a 1)
+						- term_scores.append((term, similarity)): vai armazenar o termo  com similaridade maior que 0.6 na lista term_scores, vai adicionar o termo e seu score para decidir qual os melhores termos para adicionar na expansão (exemplo de como term_scores vai ficar: [('palavra' , 0.70) , ('velocidade', 0.4)], onde 0.70 e 0.40 é a similaridade) 
+			- term_scores.sort(key=lambda x: x[1], reverse=True): vai ordenar a lista term_score em ordem decrescente (do termo mais proximo da query para o menos proximo) (.sort, o sort reorganiza a lista), key é uma função que vai dizer qual termo será usado para a ordenação, usa a função lambda (onde: x é cada elemento da lista term_scores e vai usar a similaridade como parametro para organizar a lista (x[1], se fosse usar a palavra (term) seria x[0])), reverse= true significa que será em ordem decrescente 
+			- expansion_terms = [term for term, _ in term_scores[:max_expansions]]: seleciona os max_expansions (3 por padrão, foi definido nos parametros da função) melhores termos
+			- return f"{query} {' '.join(expansion_terms)}": rtorna a consulta original + os termos de expansão (3 melhores)
+			- except Exception as e: ... return query: se ocorrer algum erro a função retorna a consulta original sem expansão
+			
+	- **GLOSSARIO_6G_BRASIL_COMPLETO**:![[Captura de Tela 2026-02-18 às 19.28.26.png]]
+		- é um dicionario python 
+		- cada chave (exemplo: 'cp':) é um termo e o valor é uma lista de sinonimos (exemplo: ['cyclic prefix', 'prefixo cíclico'])
+		- permite que o sistema entenda termos técnicos, acrônimos e sinônimos
+	
+	- **tokenize_query(query)**![[Captura de Tela 2026-02-18 às 19.36.56.png]]
+		- transforma a query em uma lista de palavras minúsculas (parecido com o que foi feito com words anteriormente)
+	
+	- **find_glossary_matches(query, max_matches=3):** ![[Captura de Tela 2026-02-19 às 08.36.02.png]]
+		- é a função que usa o glossario, é para encontrar sinonimos entre a consulta do usuário e o glossario (divide a consulta do usuário em uma lista)
+		- matches = []: cria uma lista vazia para armazenar as combinações
+		- query_lower = query.lower(): padroniza as consultas em letra minuscula
+		- tokens = tokenize_query(query): chama a função tokenize_query passando a consulta (quebra a frase em palavras(tokens))
+		- for key, synonyms in GLOSSARIO_6G_BRASIL_COMPLETO.items(): percorre o glossario, onde key é o termo principal (ancora) e synonyms os sinonimos desse termo 
+			- pattern = r'\b' + re.escape(key.lower()) + r'\b': (pattern = padrão), procura a chave do glossario como palavra exata e previne matches com palavras parecidas. o re.escape transforma caracteres especiais em literais (5G+ vira ``5G\\+``, no regex o + sozinho significa uma ou mais vezes) e o uso do \b é para pegar exatamente aquela palavra (marca inicio e fim da palavra, sendo assim protege contra palavras parecidas, ex: não pegs "tcp" quando a query do usuario é "cp")
+			- if re.search(pattern, query_lower): verifica se o padrão regex (pattern) aparece em qualquer parte da string query_lower
+				- matches.append((key, synonyms, len(key))) continue: se encontrar adiciona a lista matches o termo, os sinonimos e o tamanho da chave
+			- key_tokens = tokenize_query(key): divide a chave do glossário em palavras (caso seja uma frase)
+			- if len(key_tokens) > 1: a chave do glossario tem mais de uma palavra?
+				- if all(token in tokens for token in key_tokens): verifica se todas as palavras da chave aparecem na lista de palavras da query, caso todas apareçam o resultado é true(all retorna verdadeiro se todas as condições dentro dela foram verdadeiras). A expressão token in tokens for token in key_tokens significa para cada token em key_tokens, verifique se ele está dentro da lista tokens (para cada palavra da chave do glossário verifique se ela aparece na query)
+					- matches.append((key, synonyms, len(key_tokens))) continue: e encontrar adiciona a lista matches o termo, os sinonimos e o tamanho da chave (nesse caso usa os tokens)
+			- for token in tokens: percorre a lista de tokens
+				- if len(token) >= 4: se o token tiver pelo menos 4 letras
+					- if token in key_lower or key_lower in token: se a palavra da query e o termo do glossário compartilham uma parte significativa de texto (matching por substring (por pedaço/token))
+						- if len(token) >= len(key_lower) * 0.5: matches.append((key, synonyms, len(key_tokens))) break: garante que o match parcial não seja fraco demais (só adiciona o termo do glossario caso o token da query tiver pelo menos 50% do tamanho da chave)			
+		- matches.sort(key=lambda x: x[2], reverse=True): ordena a lista matches do maior para o menor (reverse=true) usando o terceiro elemento como critério (x[2], o tamanho do token (quantidade de palavras)).
+		- seen = set(): set é uma lista que não permite duplicados, seen vai ser uma lista sem duplicados
+		- unique_matches = []: lista com matches unicos e validos
+		- for key, synonyms, length in matches: vai "quebrar" a tupla matches (pega cada componente da tupla e os separa), melhor dar um exemplo: a lista ("prefixo cíclico", "cyclic prefix", 2) vira key = prefixo cíclico, synonyms = ["cyclic prefix"] e length=2 (ou seja o item[0] da tupla vai ser associado a variavel key, o item[1] a variavel synonyms e o item[2] a lenght)
+			- if key not in seen: se a key não estiver na lista seen 
+				- seen.add(key): essa kay é adicionada na lista seen
+				- unique_matches.append((key, synonyms)): guarda os termos unicos ordenados por relevancia 
+		- return unique_matches[:max_matches]: retorna os 3 principais matches (3 é definido na hora de passar os parametros da função
+
+	- **expand_query(query, embeddings_model=None, vectorstore=None):**![[Captura de Tela 2026-02-19 às 10.03.42.png]]
+		- 
+
+
+
+
+
