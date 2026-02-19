@@ -229,10 +229,231 @@
 				- unique_matches.append((key, synonyms)): guarda os termos unicos ordenados por relevancia 
 		- return unique_matches[:max_matches]: retorna os 3 principais matches (3 é definido na hora de passar os parametros da função
 
-	- **expand_query(query, embeddings_model=None, vectorstore=None):**![[Captura de Tela 2026-02-19 às 10.03.42.png]]
-		- 
+	- **expand_query(query, embeddings_model=None, vectorstore=None):**![[Captura de Tela 2026-02-19 às 12.40.31.png]]
+		- função principal de expansão de consulta que combina glossário e embeddings
+		- matches = find_glossary_matches(query, max_matches=3): tenta encontrar correspondências no glossário primeiro
+		- if matches: se encontrou matches no glossário
+			- expansion_terms = []: lista para armazenar termos de expansão
+			- for key, synonyms in matches: percorre cada match encontrado
+				- expansion_terms.extend(synonyms[:3]): adiciona até 3 sinônimos de cada match
+			- seen = set(): conjunto para evitar duplicatas
+			- unique_expansions = []: lista final de expansões únicas
+			- for term in expansion_terms: percorre todos os termos
+				- term_lower = term.lower(): padroniza em minúscula
+				- if term_lower not in seen: se ainda não foi adicionado
+					- seen.add(term_lower): marca como visto
+					- unique_expansions.append(term): adiciona à lista
+			- expanded = f"{query} {' '.join(unique_expansions[:5])}": junta query original com até 5 termos únicos
+			- return expanded: retorna query expandida
+		- if embeddings_model and vectorstore: se não encontrou no glossário mas tem modelo de embeddings
+			- return expand_query_with_embeddings(query, embeddings_model, vectorstore): usa expansão por embeddings
+		- return query: se nada funcionou, retorna query original
+		- Resumindo: tenta expandir usando glossário primeiro, depois embeddings, ou retorna original
 
+	- **load_pdfs_improved(directory):**![[Captura de Tela 2026-02-19 às 12.50.42.png]]
+		- carrega e processa PDFs do diretório especificado
+		- documents = []: lista para armazenar documentos processados
+		- ``files = glob.glob(os.path.join(directory, '**/*.pdf'), recursive=True): busca todos os PDFs recursivamente``
+		- if not files: return documents: se não encontrou PDFs, retorna lista vazia
+		- total_tables_extracted = 0: contador de tabelas
+		- strategy_stats = {...}: dicionário para estatísticas de estratégias usadas
+		- for filepath in files: percorre cada PDF encontrado
+			- doc = fitz.open(filepath): abre o PDF com PyMuPDF
+			- for page_num, page in enumerate(doc): percorre cada página
+				- table_text, patterns, strategy = extract_tables_with_fallback(page, page_num): extrai tabelas
+				- if strategy != "none": se encontrou tabelas
+					- strategy_stats[strategy] += 1: incrementa contador da estratégia
+					- total_tables_extracted += 1: incrementa total de tabelas
+				- text = page.get_text(): extrai texto da página
+				- combined_text = table_text + text if table_text else text: combina tabelas e texto
+				- if combined_text.strip(): se há conteúdo
+					- clean_text = clean_text_content(combined_text): limpa o texto
+					- documents.append({...}): adiciona documento com texto e metadados
+			- doc.close(): fecha o PDF
+		- logging.info(...): registra estatísticas do processamento
+		- return documents: retorna lista de documentos processados
+		- Resumindo: lê PDFs, extrai texto e tabelas, limpa conteúdo e retorna documentos estruturados
 
+# Funções auxiliares de gerenciamento
+- funções para gerenciar o banco de dados vetorial
+- Funções:
+	- **reset_database():**![[Captura de Tela 2026-02-19 às 12.53.23.png]]
+		- remove completamente o banco de dados ChromaDB
+		- import shutil: importa biblioteca para operações de arquivo
+		- if os.path.exists(CHROMA_PERSIST_DIR): verifica se o diretório existe
+			- shutil.rmtree(CHROMA_PERSIST_DIR): remove o diretório e todo seu conteúdo
+			- print(...): informa que foi removido
+		- else: print(...): informa que não existe
+		- Resumindo: deleta o banco de dados para recriá-lo do zero
 
+	- **check_database_status():**![[Captura de Tela 2026-02-19 às 12.53.48.png]]
+		- verifica status do banco de dados e conta documentos
+		- if os.path.exists(CHROMA_PERSIST_DIR): se o diretório existe
+			- try: tenta acessar
+				- client = chromadb.PersistentClient(path=CHROMA_PERSIST_DIR): conecta ao banco
+				- collection = client.get_collection(name="6g_docs"): busca a coleção
+				- count = collection.count(): conta documentos
+				- print(...): mostra quantidade
+				- return True, count: retorna sucesso e contagem
+			- except: se der erro
+				- print(...): mostra erro
+				- return False, 0: retorna falha
+		- else: se não existe
+			- print(...): informa que não existe
+			- return False, 0: retorna falha
+		- Resumindo: verifica se o banco existe e quantos documentos tem
 
+# Classe de Re-Ranking
+- implementa o re-ranking de documentos usando CrossEncoder
+- melhora a relevância dos documentos recuperados
+- Classe:![[Captura de Tela 2026-02-19 às 12.55.19.png]]
+	- **ReRankingRetriever:**
+		- __init__(self, base_retriever, cross_encoder, top_k=4): construtor
+			- self.base_retriever = base_retriever: armazena retriever base
+			- self.cross_encoder = cross_encoder: armazena modelo de re-ranking
+			- self.top_k = top_k: número de documentos a retornar (padrão 4)
+		
+		- **get_relevant_documents(self, query):**
+			- expanded_query = expand_query(query): expande a consulta
+			- initial_docs = self.base_retriever.invoke(expanded_query): busca documentos iniciais
+			- if not initial_docs: return []: se não encontrou nada, retorna vazio
+			- pairs = [(query, doc.page_content) for doc in initial_docs]: cria pares query-documento
+			- scores = self.cross_encoder.predict(pairs): calcula scores de relevância
+			- docs_with_scores = []: lista para documentos com scores
+			- for doc, score in zip(initial_docs, scores): percorre docs e scores
+				- source = doc.metadata.get('source', 'desconhecido'): pega fonte do documento
+				- is_pdf = 'pdf' in source.lower() or source.endswith('.pdf'): verifica se é PDF
+				- priority_boost = 1.2 if is_pdf else 1.0: dá boost para PDFs
+				- adjusted_score = score * priority_boost: ajusta score com boost
+				- docs_with_scores.append({...}): adiciona à lista com todas as informações
+			- valid_docs = [d for d in docs_with_scores if d['adjusted_score'] > MIN_CROSS_ENCODER_SCORE]: filtra por score mínimo
+			- if not valid_docs: return []: se nenhum passou, retorna vazio
+			- valid_docs.sort(key=lambda x: (x['is_pdf'], x['adjusted_score']), reverse=True): ordena por tipo (PDF primeiro) e score
+			- max_score = valid_docs[0]['adjusted_score']: pega maior score
+			- threshold = max_score * MIN_RELATIVE_SCORE: calcula threshold relativo
+			- filtered_docs = [d['doc'] for d in valid_docs if d['adjusted_score'] >= threshold][:self.top_k]: filtra e limita quantidade
+			- for i, doc in enumerate(filtered_docs): adiciona metadados aos documentos
+				- doc.metadata['source_type'] = 'PDF' if d['is_pdf'] else 'Modelo': marca tipo de fonte
+				- doc.metadata['retrieval_score'] = float(d['adjusted_score']): adiciona score
+			- return filtered_docs: retorna documentos filtrados e ordenados
+			- Resumindo: busca documentos, calcula relevância com CrossEncoder, prioriza PDFs e retorna os mais relevantes
 
+# Configuração do LLM
+- carrega e configura o modelo de linguagem
+- usa Unsloth para otimização ![[Captura de Tela 2026-02-19 às 12.56.06.png]]
+- Código:
+	- torch.cuda.empty_cache(): limpa cache da GPU
+	- LLM_MODEL_NAME = "unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit": define modelo a usar
+	- model, tokenizer = FastLanguageModel.from_pretrained(...): carrega modelo e tokenizador
+		- model_name = LLM_MODEL_NAME: nome do modelo
+		- max_seq_length = 1024: tamanho máximo de sequência
+		- dtype = None: tipo de dados automático
+		- load_in_4bit = True: carrega em 4 bits (quantização)
+		- device_map="auto": mapeia automaticamente para dispositivos disponíveis
+	- FastLanguageModel.for_inference(model): prepara modelo para inferência
+	- if tokenizer.pad_token is None: se não tem token de padding
+		- tokenizer.pad_token = tokenizer.eos_token: usa token de fim como padding
+		- tokenizer.pad_token_id = tokenizer.eos_token_id: define ID do padding
+	- Resumindo: carrega LLM otimizado em 4 bits para inferência eficiente
+
+# Configuração do sistema RAG completo
+- inicializa todos os componentes do sistema![[Captura de Tela 2026-02-19 às 12.57.13.png]]
+- Código:
+	- base_retriever, embeddings = setup_vectorstore(): configura banco vetorial e embeddings
+	- cross_encoder = CrossEncoder(CROSS_ENCODER_MODEL, device=device): carrega modelo de re-ranking
+	- retriever = ReRankingRetriever(base_retriever, cross_encoder): cria retriever com re-ranking
+	- Resumindo: monta pipeline completo de recuperação com embeddings, banco vetorial e re-ranking
+
+# Funções de consulta e geração de resposta
+- implementam o sistema de perguntas e respostas
+- Funções:
+	- **SYSTEM_PROMPT:**![[Captura de Tela 2026-02-19 às 12.57.58.png]]
+		- prompt de sistema que define comportamento do LLM
+		- instruções rígidas para extrair apenas do contexto fornecido
+		- proíbe inventar informações ou usar conhecimento externo
+		- define formato de resposta técnica e objetiva
+		- prioriza dados de PDF sobre outras fontes
+		- inclui exemplos de respostas corretas e incorretas
+	
+	- **query_documents(question):**![[Captura de Tela 2026-02-19 às 12.59.31.png]]
+		- busca documentos relevantes para a pergunta
+		- relevant_docs = retriever.get_relevant_documents(question): busca documentos
+		- if not relevant_docs: return "...": se não encontrou, retorna mensagem
+		- pdf_docs = []: lista para documentos PDF
+		- model_docs = []: lista para documentos de modelo
+		- for doc in relevant_docs: separa por tipo de fonte
+		- prioritized_docs = pdf_docs + model_docs: prioriza PDFs
+		- context_parts = []: lista para partes do contexto
+		- total_chars = 0: contador de caracteres
+		- for doc in prioritized_docs: monta contexto respeitando limite de tokens
+			- if total_chars + len(content) <= MAX_CONTEXT_TOKENS: se cabe
+				- context_parts.append(content): adiciona conteúdo
+				- total_chars += len(content): atualiza contador
+			- else: se não cabe
+				- adiciona truncado e para
+		- context = "\\n\\n".join(context_parts): junta todas as partes
+		- prompt = f"""{SYSTEM_PROMPT}...""": monta prompt completo
+		- return prompt, context, relevant_docs, metadata: retorna tudo
+		- Resumindo: busca documentos, prioriza PDFs, monta contexto e prompt
+
+	- **generate_answer(prompt, metadata=None):**
+		![[Captura de Tela 2026-02-19 às 13.00.13.png]]
+		- gera resposta usando o LLM
+		- extrai pergunta e contexto do prompt
+		- messages = [{...}]: formata mensagem para o modelo
+		- input_text = tokenizer.apply_chat_template(...): aplica template de chat
+		- inputs = tokenizer(...): tokeniza entrada
+		- inputs = {k: v.to(device) for k, v in inputs.items()}: move para GPU
+		- with torch.no_grad(): desabilita gradientes (inferência)
+			- outputs = model.generate(...): gera resposta
+				- max_new_tokens=400: máximo de tokens a gerar
+				- temperature=0.1: baixa temperatura (mais determinístico)
+				- do_sample=True: usa amostragem
+				- top_p=0.9: nucleus sampling
+				- repetition_penalty=1.2: penaliza repetições
+		- generated_tokens = outputs[0][inputs['input_ids'].shape[1]:]: pega apenas tokens gerados
+		- response = tokenizer.decode(...): decodifica resposta
+		- if metadata: adiciona indicador de confiança baseado na fonte
+		- return response: retorna resposta gerada
+		- Resumindo: usa LLM para gerar resposta técnica baseada no contexto
+
+	- **hierarchical_search_and_generate(question):**![[Captura de Tela 2026-02-19 às 13.01.25.png]]
+		- função principal que orquestra busca e geração
+		- query_result = query_documents(question): busca documentos
+		- if isinstance(query_result, str): se deu erro, retorna erro
+		- prompt, context, relevant_docs, metadata = query_result: desempacota resultado
+		- pdf_percentage = (metadata['pdf_count'] / max(len(relevant_docs), 1)) * 100: calcula % de PDFs
+		- hierarchy_info = {...}: monta informações de hierarquia
+		- response = generate_answer(prompt, metadata=metadata): gera resposta
+		- if pdf_percentage >= 75: confidence = 'alta': define nível de confiança
+		- elif pdf_percentage >= 25: confidence = 'média'
+		- else: confidence = 'baixa'
+		- return {...}: retorna resposta completa com metadados
+		- Resumindo: coordena busca, geração e avaliação de confiança
+
+# Sistema interativo de perguntas
+- interface para fazer perguntas ao sistema
+- Função:
+	- **ask_question():**![[Captura de Tela 2026-02-19 às 13.02.07.png]]
+		- question = input("..."): pede pergunta ao usuário
+		- if question.lower() == 'sair': return False: verifica se quer sair
+		- result = hierarchical_search_and_generate(question): processa pergunta
+		- if result.get('confidence') != 'erro': se não deu erro
+			- print("=== RESPOSTA ==="): mostra resposta
+			- print(result['response']): mostra texto da resposta
+			- print(f"=== CONFIANÇA: {result['confidence_desc']} ==="): mostra nível de confiança
+			- if result.get('hierarchy_info'): se tem info de hierarquia
+				- print(...): mostra estatísticas (total docs, PDFs, modelos)
+			- if result.get('docs'): se tem documentos fonte
+				- print("=== FONTES ==="): lista fontes usadas
+				- for i, doc in enumerate(result['docs'], 1): mostra cada fonte
+					- print(f"{i}. {doc.metadata['source']} - Página {doc.metadata['page']}"): fonte e página
+		- else: se deu erro
+			- print(f"Erro: {result['response']}"): mostra mensagem de erro
+		- return True: continua loop
+	- Loop principal:
+		- print("Sistema pronto! Faça suas perguntas."): mensagem inicial
+		- print("Digite 'sair' para terminar."): instrução
+		- while ask_question(): pass: loop até usuário digitar 'sair'
+		- print("Sessão encerrada."): mensagem final
+		- Resumindo: interface de linha de comando para interagir com o sistema RAG
