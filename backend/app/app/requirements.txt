@@ -1,0 +1,13 @@
+PyMuPDF
+torch
+numpy
+sentence-transformers
+langchain
+langchain-text-splitters
+langchain-core
+langchain-huggingface
+langchain-chroma
+chromadb
+transformers
+accelerate
+bitsandbytes
