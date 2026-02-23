@@ -1,0 +1,25 @@
+{
+	"nodes":[
+		{"id":"b4e0b868f7320edb","type":"text","text":"usuario A","x":-100,"y":-200,"width":250,"height":60},
+		{"id":"6f15aad0c7fb6c87","type":"text","text":"usuario B","x":-100,"y":-100,"width":250,"height":60},
+		{"id":"d6fb475615f2dc3f","type":"text","text":"usuario C","x":-100,"y":0,"width":250,"height":60},
+		{"id":"ae4d622b3fadd785","type":"text","text":"pergunta: \"o que é o Brasil 6G?\"","x":260,"y":0,"width":250,"height":60},
+		{"id":"fd7bfe97998e649f","type":"text","text":"pergunta: \"quais as diferenças entre 5G e 6G?\"","x":260,"y":-200,"width":250,"height":60},
+		{"id":"eed24e7a010c37f6","type":"text","text":"pergunta: \"me explica mais sobre o 6G\"","x":260,"y":-97,"width":250,"height":55},
+		{"id":"79184d38dce57e9c","type":"text","text":"Inicia o processamento de todas de forma concorrente","x":700,"y":-97,"width":250,"height":60},
+		{"id":"b119132d05892b0b","type":"text","text":"resposta usuario C","x":1060,"y":0,"width":250,"height":60},
+		{"id":"7c06fdee9344123d","type":"text","text":"resposta usuario B","x":1060,"y":-92,"width":250,"height":50},
+		{"id":"dd4d673d0955b5ea","type":"text","text":"resposta usuario A","x":1060,"y":-200,"width":250,"height":60}
+	],
+	"edges":[
+		{"id":"4bfe309f72405581","fromNode":"b4e0b868f7320edb","fromSide":"right","toNode":"fd7bfe97998e649f","toSide":"left"},
+		{"id":"2f0eac5efa564f92","fromNode":"6f15aad0c7fb6c87","fromSide":"right","toNode":"eed24e7a010c37f6","toSide":"left"},
+		{"id":"a5717535167cec37","fromNode":"d6fb475615f2dc3f","fromSide":"right","toNode":"ae4d622b3fadd785","toSide":"left"},
+		{"id":"5459e6166f244be3","fromNode":"fd7bfe97998e649f","fromSide":"right","toNode":"79184d38dce57e9c","toSide":"left"},
+		{"id":"8e646dab2701bc8c","fromNode":"eed24e7a010c37f6","fromSide":"right","toNode":"79184d38dce57e9c","toSide":"left"},
+		{"id":"715bbe01c2ba3e4f","fromNode":"ae4d622b3fadd785","fromSide":"right","toNode":"79184d38dce57e9c","toSide":"left"},
+		{"id":"2a92d2c3fb98be79","fromNode":"79184d38dce57e9c","fromSide":"right","toNode":"dd4d673d0955b5ea","toSide":"left"},
+		{"id":"8f16963d3c123fa9","fromNode":"79184d38dce57e9c","fromSide":"right","toNode":"7c06fdee9344123d","toSide":"left"},
+		{"id":"fa73a872667d6580","fromNode":"79184d38dce57e9c","fromSide":"right","toNode":"b119132d05892b0b","toSide":"left"}
+	]
+}

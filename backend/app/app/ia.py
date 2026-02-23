@@ -17,10 +17,10 @@ import chromadb
 
 PDF_DIR = os.getenv('PDF_DIR', '/Users/annabittencourt/projetos/IC_METAVERSO/backend/app/Data')
 CHROMA_PERSIST_DIR = os.getenv('CHROMA_PERSIST_DIR', '/Users/annabittencourt/projetos/IC_METAVERSO/backend/app/chroma_db')
-HUGGINGFACE_TOKEN = os.getenv('HUGGINGFACE_TOKEN', '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')
+HUGGINGFACE_TOKEN = os.getenv('HUGGINGFACE_TOKEN', '')
 EMBEDDING_MODEL_NAME = 'intfloat/multilingual-e5-large'
 CROSS_ENCODER_MODEL = 'BAAI/bge-reranker-v2-m3'
-LLM_MODEL_NAME = 'meta-llama/Llama-3.1-8B-Instruct'
+LLM_MODEL_NAME = 'meta-llama/Llama-3.1-8B'
 
 MIN_CROSS_ENCODER_SCORE = 0.2
 MIN_RELATIVE_SCORE = 0.25
@@ -726,43 +726,72 @@ class IASystem:
         
     def initialize(self):
         logging.info("Inicializando sistema IA...")
-        
+
         torch.cuda.empty_cache()
-        
-        bnb_config = BitsAndBytesConfig(
-            load_in_4bit=True,
-            bnb_4bit_quant_type="nf4",
-            bnb_4bit_compute_dtype=torch.float16,
-            bnb_4bit_use_double_quant=True
-        )
-        
-        logging.info(f"Carregando modelo {LLM_MODEL_NAME}...")
+
+        # ====================== DETECÇÃO INTELIGENTE DE HARDWARE ======================
+        if torch.cuda.is_available():
+            device = "cuda"
+            use_4bit = True
+            logging.info("🚀 Detectado NVIDIA GPU → usando 4-bit quantization")
+        elif torch.backends.mps.is_available():
+            device = "mps"
+            use_4bit = False
+            logging.info("🍎 Detectado Apple Silicon (MPS) → carregando em float16 (sem BitsAndBytes)")
+        else:
+            device = "cpu"
+            use_4bit = False
+            logging.warning("⚠️  Rodando em CPU pura → vai ficar lento!")
+
+        # ====================== CONFIGURAÇÃO DO MODELO ======================
+        if use_4bit:
+            bnb_config = BitsAndBytesConfig(
+                load_in_4bit=True,
+                bnb_4bit_quant_type="nf4",
+                bnb_4bit_compute_dtype=torch.float16,
+                bnb_4bit_use_double_quant=True,
+            )
+            model_kwargs = {
+                "quantization_config": bnb_config,
+                "device_map": "auto",           # ou "cuda:0" se quiser forçar
+                "torch_dtype": torch.float16,
+                "low_cpu_mem_usage": True,
+                "token": HUGGINGFACE_TOKEN,
+            }
+        else:
+            # Para Mac (MPS) ou CPU
+            model_kwargs = {
+                "device_map": device,           # "mps" ou "cpu"
+                "torch_dtype": torch.float16 if device == "mps" else torch.float32,
+                "low_cpu_mem_usage": True,
+                "token": HUGGINGFACE_TOKEN,
+            }
+
+        logging.info(f"Carregando modelo {LLM_MODEL_NAME} em {device.upper()}...")
+
         self.tokenizer = AutoTokenizer.from_pretrained(
             LLM_MODEL_NAME,
             token=HUGGINGFACE_TOKEN
         )
-        
+
         self.model = AutoModelForCausalLM.from_pretrained(
             LLM_MODEL_NAME,
-            quantization_config=bnb_config,
-            device_map="auto",
-            token=HUGGINGFACE_TOKEN,
-            torch_dtype=torch.float16
+            **model_kwargs
         )
-        
+
         if self.tokenizer.pad_token is None:
             self.tokenizer.pad_token = self.tokenizer.eos_token
             self.tokenizer.pad_token_id = self.tokenizer.eos_token_id
+
+        logging.info(f"✅ LLM carregado com sucesso em {device.upper()}!")
         
-        logging.info("LLM carregado com sucesso!")
-        
+        # ====================== RESTO DO CÓDIGO (vectorstore + reranker) ======================
         base_retriever, self.embeddings = setup_vectorstore()
         
-        cross_encoder = CrossEncoder(CROSS_ENCODER_MODEL, device=device)
-        
+        cross_encoder = CrossEncoder(CROSS_ENCODER_MODEL, device=device if device != "mps" else "cpu")
         self.retriever = ReRankingRetriever(base_retriever, cross_encoder)
         
-        logging.info("Sistema IA inicializado com sucesso!")
+        logging.info("🎉 Sistema IA inicializado com sucesso!")
     
     def ask(self, question):
         if not self.model or not self.retriever:

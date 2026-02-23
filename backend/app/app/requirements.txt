@@ -11,3 +11,7 @@ chromadb
 transformers
 accelerate
 bitsandbytes
+fastapi
+uvicorn[standard]
+python-multipart
+python-dotenv
