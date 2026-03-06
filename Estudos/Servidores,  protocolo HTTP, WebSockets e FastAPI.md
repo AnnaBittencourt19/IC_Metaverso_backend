@@ -22,4 +22,4 @@ O WebSocket usa um processo chamado handshake para estabelecer a conexão
 Na comunicação síncrona, quem faz a requisição(cliente) fica parado esperando a resposta antes de continuar e na comunicação assíncrona quem faz a requisição não fica parado ele pode continuar executando outras tarefas enquanto a resposta não chega
 No sincrono cada pergunta congela o servidor e gera e fila (atrasos) e no assincrono o servidor delega tarefas. Exemplo:
 ![[assincrono.png]]
-Lida com várias tarefas ao mesmo tempo, alternando entre elas (aproveita tempo de espera do usuario A para começar a processar o B)bolo e 
+Lida com várias tarefas ao mesmo tempo, alternando entre elas (aproveita tempo de espera do usuario A para começar a processar o B)

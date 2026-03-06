@@ -457,3 +457,12 @@
 		- while ask_question(): pass: loop até usuário digitar 'sair'
 		- print("Sessão encerrada."): mensagem final
 		- Resumindo: interface de linha de comando para interagir com o sistema RAG
+
+Sugestões de melhorias: 
+- Diversos acrônimos não foram definidos na 1ª vez que apareceram, como C-RAN, A-ROF, OOBE, RF, TVWS e outros. Isso deve ser realizado, pois para uma pessoa que não tenha conhecimento do assunto pode gerar dúvida e incompreensão.
+- Na parte CONTEXTO ENCONTRATO ficou muito longo e prolixo. Ao final do texto desta parte fica difícil sintetizar sobre o que se está falando, pois informações demais são jogadas.
+- Ao fazer a pergunta o que é DPD e MZM o que é o usuário da aplicação espera é encontrar uma definição, como foi colocado em "Definição de DPD", "Função da DPD" , "Aplicação da DPD em A-RoF", "Benefícios da DPD" e "Conclusão".
+- Não foi realizado o mesmo com o MZM, sendo que lá no início você pergunto o que era DPD e MZM ("O que é DPD e MZM?").
+- Nas respostas não deveria entrar os números das referência, pois o usuário não interessa esse número. Talvez o que possa ser colocado é o nome da referência associado a um link, caso o usuário se interesse em saber de onde a informação foi retirada.
+- Também não acho legal quando aparece assim: "Há ainda a possibilidade de integrar aplicações A-RoF e FTTH na mesma arquitetura de rede utilizando WDM overlay, como demonstrado em [229].". Essa parte "como demostrado em [XX] não acho interessante aparecer na resposta. 
+- Respostas como "**Alcance Máximo**: Não está explicitamente mencionado", não acho legal, poi parece só uma cópia do texto de origem. Ficaria bem melhor se a resposta fosse somente: "Pode ser inferido como sendo relacionado com a frequência de trabalho do sistema 6G, que não é especificada nesse texto. No entanto, podemos considerar que o alcance máximo seria determinado pela tecnologia de uso e pelo ambiente de implantação, pois dependendo disso, podem haver limitações nas características dos sinais transmitidos."
