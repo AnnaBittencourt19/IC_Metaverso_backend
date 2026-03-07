@@ -1,0 +1,10 @@
+- As vezes o Display está com pixels mortos devido a erros no código (as vezes erros no software vão refletir no hardware)
+- Pelo Thonny é muito mais fácil instalar o micropython no ESP32 do que no terminal (epstool)
+- O arquivo que vai ser usado sempre se chama ```main.py```
+- É preciso ter um arquivo chamado ```ili9341.py``` para o display funcionar
+- Prestar muito a atenção nos cabos talvez vc tenha soldado o cabo errado no seu reed switch e isso vai te causar muito sofrimento pq ngm aguenta mais te ajudar a soldar (é no cabo verde(GND) e no preto(IO22))
+- Antes eu achava que era melhor conectar no IO35 porém com os erros aprendi que o IO35 não tem resistência interna e o IO22 sim, então usar o IO22 economiza o uso de resistores
+- Imã de geladeira é mto fraco para causar alterações no reed switch (tem que usar Imã Neodimio)
+- Se caso vc conecte o cabo errado e o GND fique solto pelo seu erro e ele encoste em vc, vc leva um leve choque (bem levinho parece um beliscãozinho)
+- Comprei 10 imãs de neodimio de 1600 Gauss se isso não mudar o sensor, o sensor que está estragado
+- 

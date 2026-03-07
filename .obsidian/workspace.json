@@ -65,12 +65,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "documentacao/Manual.md",
+                "file": "documentacao/Maiores lições mexendo com ESP32.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Manual"
+              "title": "Maiores lições mexendo com ESP32"
             }
           },
           {
@@ -252,6 +252,11 @@
   },
   "active": "c32398fe66904cf7",
   "lastOpenFiles": [
+    "documentacao/O que foi feito/instalar o micropy no ESP32.md",
+    "documentacao/Maiores lições mexendo com ESP32.md",
+    "documentacao/O que foi feito/Como passar um arquivo para o ESP32.md",
+    "documentacao/O que foi feito/configurações gerais.md",
+    "documentacao/Manual.md",
     "Pasted image 20260306172724.png",
     "Estudos/HTTP.md",
     "documentacao/Dicionário.md",
@@ -263,11 +268,9 @@
     "documentacao/O que foi feito/mqtt.py.md",
     "documentacao/O que foi feito/websocket.py.md",
     "documentacao/O que foi feito/ia no colab.md",
-    "documentacao/O que foi feito/instalar o micropy no ESP32.md",
     "backend/app/Data/1747161471797white-paper-antenas-adaptativas - cópia.pdf",
     "Estudos/Servidores,  protocolo HTTP, WebSockets e FastAPI.md",
     "Estudos/RAG.md",
-    "documentacao/Manual.md",
     "Estudos/IA.md",
     "Explicação de CRR_Inatel_Project/CRR_Inatel_Project.md",
     "Estudos/Como construir um RAG.md",
@@ -291,14 +294,11 @@
     "Imagens/Captura de Tela 2026-02-19 às 13.01.25.png",
     "Imagens/Captura de Tela 2026-02-19 às 13.00.13.png",
     "Imagens/Captura de Tela 2026-02-19 às 12.59.31.png",
-    "Imagens/Captura de Tela 2026-02-19 às 12.57.58.png",
     "documentacao/O que foi feito/IC_METAVERSO_Última_versão_(última_mesmo)_(1).ipynb",
     "FastAPI_do_zero/Erros e como resolver.md",
     "FastAPI_do_zero/Parte 1 - Configurando o ambiente de desenvolvimento/6. Configurando as ferramentas de desenvolvimento.md",
     "FastAPI_do_zero/Parte 1 - Configurando o ambiente de desenvolvimento/5. Instalando as ferramentas de desenvolvimento.md",
     "FastAPI_do_zero/Parte 1 - Configurando o ambiente de desenvolvimento/4.  Primeira execução de um \"Hello, World!\".md",
-    "FastAPI_do_zero/Parte 1 - Configurando o ambiente de desenvolvimento/3. Criando um projeto.md",
-    "FastAPI_do_zero/Parte 1 - Configurando o ambiente de desenvolvimento/2. Instalando as dependências.md",
     "backend/app/test_quick.py",
     "Sem título 3.canvas",
     "Sem título 2.canvas"
