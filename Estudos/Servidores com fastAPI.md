@@ -1,0 +1,4 @@
+- APIS são basicamente um conjunto de URLs (rotas) que programas podem chamar via HTTP para trocar dados
+- uvicorn é o servidor ASGI (Asynchronous Server Gateway Interface) para comunicação assincrona 
+- (@app.get) registra rotas
+- /ws : websocket
