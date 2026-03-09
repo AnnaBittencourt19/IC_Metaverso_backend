@@ -5,6 +5,5 @@
 - Prestar muito a atenção nos cabos talvez vc tenha soldado o cabo errado no seu reed switch e isso vai te causar muito sofrimento pq ngm aguenta mais te ajudar a soldar (é no cabo verde(GND) e no preto(IO22))
 - Antes eu achava que era melhor conectar no IO35 porém com os erros aprendi que o IO35 não tem resistência interna e o IO22 sim, então usar o IO22 economiza o uso de resistores
 - Imã de geladeira é mto fraco para causar alterações no reed switch (tem que usar Imã Neodimio)
-- Se caso vc conecte o cabo errado e o GND fique solto pelo seu erro e ele encoste em vc, vc leva um leve choque (bem levinho parece um beliscãozinho)
 - Comprei 10 imãs de neodimio de 1600 Gauss se isso não mudar o sensor, o sensor que está estragado
-- 
+- Pino 35 não tem resistencia interna PULLUP, nisso o pino fica flutuando e recebendo influencias externas. Em um teste realizado com o reed switch conectado ao GND e ao pino 35 foi observado que quando o imã está próximo do reed switch o resultado fica constante em um só e com o imã distante o estado fica oscilando rapidamente, provando assim que o pino 35 está flutuando e é necessário a troca para o pino 22 ou o uso de um resistor
