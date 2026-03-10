@@ -7,3 +7,6 @@
 - Imã de geladeira é mto fraco para causar alterações no reed switch (tem que usar Imã Neodimio)
 - Comprei 10 imãs de neodimio de 1600 Gauss se isso não mudar o sensor, o sensor que está estragado
 - Pino 35 não tem resistencia interna PULLUP, nisso o pino fica flutuando e recebendo influencias externas. Em um teste realizado com o reed switch conectado ao GND e ao pino 35 foi observado que quando o imã está próximo do reed switch o resultado fica constante em um só e com o imã distante o estado fica oscilando rapidamente, provando assim que o pino 35 está flutuando e é necessário a troca para o pino 22 ou o uso de um resistor
+- Soldar é mais difícil do que parece
+- É bom desencapar bem a ponta do jumper pra evitar derreter o "plastico" dele 
+- Para evitar soldas desnecessárias pode-se usar um jumper JIT com pontas fêmeas (é possível mas não gostei de usar passa um impressão de que não está conectado direito ou está bambo ao soldar temos mais confiança nessa parte de conexão)
