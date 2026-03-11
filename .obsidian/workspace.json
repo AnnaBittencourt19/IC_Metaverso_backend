@@ -65,12 +65,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Estudos/Símbolos de subquadro (numerologia).md",
+                "file": "Estudos/Prompt e respostas do modelo.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Símbolos de subquadro (numerologia)"
+              "title": "Prompt e respostas do modelo"
             }
           },
           {
@@ -252,8 +252,9 @@
   },
   "active": "c32398fe66904cf7",
   "lastOpenFiles": [
+    "Captura de Tela 2026-03-11 às 09.04.12.png",
     "documentacao/Maiores lições mexendo com ESP32.md",
-    "Estudos/Símbolos de subquadro (numerologia).md",
+    "Estudos/Prompt e respostas do modelo.md",
     "documentacao/O que foi feito/ia no colab.md",
     "FastAPI_do_zero/Parte 1 - Configurando o ambiente de desenvolvimento/8. Simulado sobre a parte 1.md",
     "FastAPI_do_zero/Parte 1 - Configurando o ambiente de desenvolvimento/6. Configurando as ferramentas de desenvolvimento.md",
@@ -282,7 +283,6 @@
     "Imagens/assincrono.canvas",
     "Imagens/assincrono.png",
     "documentacao/O que foi feito/mqtt.py.md",
-    "documentacao/O que foi feito/websocket.py.md",
     "backend/app/Data/1747161471797white-paper-antenas-adaptativas - cópia.pdf",
     "Imagens/Captura de Tela 2026-02-23 às 07.47.59.png",
     "Imagens/Captura de Tela 2025-12-19 às 12.56.22.png",
