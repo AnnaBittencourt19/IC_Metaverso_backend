@@ -65,12 +65,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Estudos/Prompt e respostas do modelo.md",
-                "mode": "source",
+                "file": "Estudos/Plano de estudo.md",
+                "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Prompt e respostas do modelo"
+              "title": "Plano de estudo"
             }
           },
           {
@@ -250,11 +250,17 @@
       "bases:Criar nova base": false
     }
   },
-  "active": "c32398fe66904cf7",
+  "active": "7cf812c8ab452844",
   "lastOpenFiles": [
+    "Estudos/Meu caderno.pdf",
+    "Estudos/Prompt e respostas do modelo.md",
+    "Estudos/IA.md",
+    "Estudos/HTTP.md",
+    "FastAPI_do_zero/Erros e como resolver.md",
+    "documentacao/Manual.md",
+    "Imagens/assincrono.png",
     "Captura de Tela 2026-03-11 às 09.04.12.png",
     "documentacao/Maiores lições mexendo com ESP32.md",
-    "Estudos/Prompt e respostas do modelo.md",
     "documentacao/O que foi feito/ia no colab.md",
     "FastAPI_do_zero/Parte 1 - Configurando o ambiente de desenvolvimento/8. Simulado sobre a parte 1.md",
     "FastAPI_do_zero/Parte 1 - Configurando o ambiente de desenvolvimento/6. Configurando as ferramentas de desenvolvimento.md",
@@ -264,16 +270,13 @@
     "FastAPI_do_zero/1. Objetivo do curso.md",
     "FastAPI_do_zero/Parte 2 - Introdução ao desenvolvimento web/8. Introdução ao desenvolvimento web.md",
     "FastAPI + WebSocket/Estudos.md",
-    "Estudos/HTTP.md",
     "Estudos/Como construir um RAG.md",
-    "Estudos/IA.md",
     "Estudos/Plano de estudo.md",
     "Estudos/RAG.md",
     "Estudos/Servidores com fastAPI.md",
     "Estudos/Servidores,  protocolo HTTP, WebSockets e FastAPI.md",
     "documentacao/O que foi feito/Main.py.md",
     "documentacao/Dicionário.md",
-    "documentacao/Manual.md",
     "documentacao/O que foi feito/instalar o micropy no ESP32.md",
     "documentacao/O que foi feito/Como passar um arquivo para o ESP32.md",
     "documentacao/O que foi feito/configurações gerais.md",
@@ -281,8 +284,6 @@
     "Imagens/Sem título 1.canvas",
     "Imagens/Pasted image 20260218164351.png",
     "Imagens/assincrono.canvas",
-    "Imagens/assincrono.png",
-    "documentacao/O que foi feito/mqtt.py.md",
     "backend/app/Data/1747161471797white-paper-antenas-adaptativas - cópia.pdf",
     "Imagens/Captura de Tela 2026-02-23 às 07.47.59.png",
     "Imagens/Captura de Tela 2025-12-19 às 12.56.22.png",
@@ -297,7 +298,6 @@
     "Imagens/Captura de Tela 2026-02-19 às 13.02.07.png",
     "Imagens/Captura de Tela 2026-02-19 às 13.01.25.png",
     "Imagens/Captura de Tela 2026-02-19 às 13.00.13.png",
-    "Imagens/Captura de Tela 2026-02-19 às 12.59.31.png",
     "documentacao/O que foi feito/IC_METAVERSO_Última_versão_(última_mesmo)_(1).ipynb",
     "backend/app/test_quick.py",
     "Sem título 3.canvas",
