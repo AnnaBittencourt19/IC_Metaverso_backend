@@ -1,0 +1,3 @@
+- Uso da biblioteca SpeechRecognition
+- sr.AudioFile
+- 

@@ -65,12 +65,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Estudos/Plano de estudo.md",
-                "mode": "preview",
+                "file": "documentacao/O que foi feito/Opção de entrada de audio na IA.md",
+                "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Plano de estudo"
+              "title": "Opção de entrada de audio na IA"
             }
           },
           {
@@ -252,16 +252,24 @@
   },
   "active": "7cf812c8ab452844",
   "lastOpenFiles": [
+    "documentacao/O que foi feito/vectorBD.md",
+    "documentacao/O que foi feito/Opção de entrada de audio na IA.md",
+    "documentacao/O que foi feito/websocket.py.md",
+    "documentacao/O que foi feito/Main.py.md",
+    "documentacao/O que foi feito/instalar o micropy no ESP32.md",
+    "documentacao/O que foi feito/ia no colab.md",
+    "documentacao/Manual incubadora.md",
+    "documentacao/Manual.md",
+    "documentacao/Maiores lições mexendo com ESP32.md",
+    "documentacao/UML.svg",
+    "Estudos/Plano de estudo.md",
     "Estudos/Meu caderno.pdf",
     "Estudos/Prompt e respostas do modelo.md",
     "Estudos/IA.md",
     "Estudos/HTTP.md",
     "FastAPI_do_zero/Erros e como resolver.md",
-    "documentacao/Manual.md",
     "Imagens/assincrono.png",
-    "Captura de Tela 2026-03-11 às 09.04.12.png",
-    "documentacao/Maiores lições mexendo com ESP32.md",
-    "documentacao/O que foi feito/ia no colab.md",
+    "Imagens/Captura de Tela 2026-03-11 às 09.04.12.png",
     "FastAPI_do_zero/Parte 1 - Configurando o ambiente de desenvolvimento/8. Simulado sobre a parte 1.md",
     "FastAPI_do_zero/Parte 1 - Configurando o ambiente de desenvolvimento/6. Configurando as ferramentas de desenvolvimento.md",
     "FastAPI_do_zero/Parte 1 - Configurando o ambiente de desenvolvimento/5. Instalando as ferramentas de desenvolvimento.md",
@@ -271,16 +279,10 @@
     "FastAPI_do_zero/Parte 2 - Introdução ao desenvolvimento web/8. Introdução ao desenvolvimento web.md",
     "FastAPI + WebSocket/Estudos.md",
     "Estudos/Como construir um RAG.md",
-    "Estudos/Plano de estudo.md",
     "Estudos/RAG.md",
     "Estudos/Servidores com fastAPI.md",
     "Estudos/Servidores,  protocolo HTTP, WebSockets e FastAPI.md",
-    "documentacao/O que foi feito/Main.py.md",
-    "documentacao/Dicionário.md",
-    "documentacao/O que foi feito/instalar o micropy no ESP32.md",
-    "documentacao/O que foi feito/Como passar um arquivo para o ESP32.md",
-    "documentacao/O que foi feito/configurações gerais.md",
-    "Pasted image 20260306172724.png",
+    "Imagens/Pasted image 20260306172724.png",
     "Imagens/Sem título 1.canvas",
     "Imagens/Pasted image 20260218164351.png",
     "Imagens/assincrono.canvas",
@@ -297,9 +299,7 @@
     "backend/IC_METAVERSO_Última_versão_(última_mesmo)_(1).ipynb",
     "Imagens/Captura de Tela 2026-02-19 às 13.02.07.png",
     "Imagens/Captura de Tela 2026-02-19 às 13.01.25.png",
-    "Imagens/Captura de Tela 2026-02-19 às 13.00.13.png",
     "documentacao/O que foi feito/IC_METAVERSO_Última_versão_(última_mesmo)_(1).ipynb",
-    "backend/app/test_quick.py",
     "Sem título 3.canvas",
     "Sem título 2.canvas"
   ]

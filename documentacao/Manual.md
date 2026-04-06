@@ -200,6 +200,8 @@ app.add_middleware(
 ![[UML.svg]]
 
 - OBS: Banco de dados e devops são extras (depois de tudo ficar pronto)
-
-- Planejamento do gêmeo digital: (porta de correr que muda no metaverso):
-![[Pasted image 20260306172724.png]]
+### Gêmeo digital UTI
+- Incubadora de bebês
+```
+ESP32 → MQTT Broker → Dashboard ao vivo
+```
