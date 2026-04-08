@@ -1,3 +1,4 @@
 - Uso da biblioteca SpeechRecognition
 - sr.AudioFile
-- 
+- Pelo colab não vai dar certo testar se o audio deu certo, o audio é bloqueado pela política de sandbox do iframe
+- mas por enquanto estou usando a biblioteca SpeechRecognition

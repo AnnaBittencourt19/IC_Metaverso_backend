@@ -1,0 +1,78 @@
+# Organização de Pastas do Projeto IC Metaverso
+
+```
+metaverso/
+├── app/                          # 📦 Código principal da aplicação
+│   ├── __init__.py
+│   ├── main.py                   # 🚀 FastAPI app + endpoints
+│   ├── config.py                 # ⚙️ Configurações
+│   ├── rag.py                    # 🧠 Lógica RAG
+│   └── ingest.py                 # 📄 Ingestão de documentos
+│
+├── tests/                        # 🧪 Testes
+│   ├── test_api_complete.py      # Suite completa de testes
+│   ├── test_api.py               # Testes básicos
+│   └── test_config.py            # Testes de configuração
+│
+├── docs/                         # 📚 Documentação
+│   ├── README.md                 # Guia principal
+│   ├── UNITY_INTEGRATION.md      # Integração com Unity
+│   ├── INGEST_DOCUMENTATION.md   # Ingestão de dados
+│   ├── IMPLEMENTATION_SUMMARY.md # Resumo de implementação
+│   └── setup.md                  # Guia de setup
+│
+├── config/                       # 🔧 Arquivos de configuração
+│   ├── .env.example              # Template .env
+│   └── render.yaml               # Config Render
+│
+├── scripts/                      # 🛠️ Scripts utilitários
+│   ├── setup.sh                  # Setup inicial
+│   └── quick_reference.sh        # Referência rápida
+│
+├── Data/                         # 📁 Dados (PDFs, etc)
+│   └── [arquivos de documento]
+│
+├── chroma_db_export/             # 🗄️ Banco de dados (gerado)
+│   └── chroma.sqlite3
+│
+├── .venv/                        # 🐍 Virtual environment
+│
+├── Dockerfile                    # 🐳 Dockerfile
+├── requirements.txt              # 📦 Dependências Python
+└── .env                          # 🔐 Variáveis de ambiente (local)
+```
+
+## Estrutura Anterior vs Nova
+
+### ❌ Antes (Desorganizado)
+```
+metaverso/
+├── test_api.py
+├── test_api_complete.py
+├── test_config.py
+├── README.md
+├── UNITY_INTEGRATION.md
+├── INGEST_DOCUMENTATION.md
+├── IMPLEMENTATION_SUMMARY.md
+├── EXECUTIVE_SUMMARY.md
+├── FINAL_SUMMARY.txt
+├── SETUP_SUMMARY.md
+├── FILES_CREATED.md
+├── setup.sh
+├── QUICK_REFERENCE.sh
+├── .env
+├── .env.example
+└── render.yaml
+```
+
+### ✅ Depois (Organizado)
+```
+metaverso/
+├── app/              # Código
+├── tests/            # Testes
+├── docs/             # Documentação
+├── config/           # Configurações
+├── scripts/          # Scripts
+├── Data/             # Dados
+└── chroma_db_export/ # BD
+```

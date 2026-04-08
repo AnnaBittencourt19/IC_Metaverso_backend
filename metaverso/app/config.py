@@ -1,0 +1,27 @@
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# Diretórios
+# Local: ./Data ou ./chroma_db_export
+# Render: /var/data/ (disco persistente)
+PDF_DIR = os.getenv("PDF_DIR", "/var/data/pdfs")
+CHROMA_PERSIST_DIR = os.getenv("CHROMA_PERSIST_DIR", "/var/data/chroma")
+
+# Modelos
+EMBEDDING_MODEL_NAME = "intfloat/multilingual-e5-large"
+CROSS_ENCODER_MODEL = "BAAI/bge-reranker-v2-m3"
+
+# Parâmetros de Busca e Ranking
+MIN_CROSS_ENCODER_SCORE = 0.15
+MIN_RELATIVE_SCORE = 0.20
+MAX_CONTEXT_TOKENS = 3500
+INITIAL_RETRIEVAL_K = 12
+
+# API Keys
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+GROQ_MODEL = "mixtral-8x7b-32768"
+
+if not GROQ_API_KEY:
+    raise ValueError("GROQ_API_KEY não está definida nas variáveis de ambiente")

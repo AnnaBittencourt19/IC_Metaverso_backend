@@ -65,12 +65,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "documentacao/O que foi feito/Opção de entrada de audio na IA.md",
+                "file": "documentacao/O que foi feito/Criar servidor usando Groq Cloud  + Render.com.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Opção de entrada de audio na IA"
+              "title": "Criar servidor usando Groq Cloud  + Render.com"
             }
           },
           {
@@ -250,10 +250,22 @@
       "bases:Criar nova base": false
     }
   },
-  "active": "7cf812c8ab452844",
+  "active": "c32398fe66904cf7",
   "lastOpenFiles": [
-    "documentacao/O que foi feito/vectorBD.md",
+    "metaverso/IC_METAVERSO_Última_versão_(última_mesmo)_(1)_(1)_(4)_(3)_(4).ipynb",
+    "Captura de Tela 2026-04-07 às 22.36.23.png",
+    "metaverso/app/ingest.py",
+    "metaverso/app/config.py",
+    "metaverso/app/rag.py",
+    "metaverso/app/main.py",
+    "metaverso/app",
+    "metaverso/render.yaml",
+    "metaverso/requeriments.txt",
+    "metaverso/Sem título.md",
+    "documentacao/O que foi feito/Criar servidor usando Groq Cloud  + Render.com.md",
+    "metaverso",
     "documentacao/O que foi feito/Opção de entrada de audio na IA.md",
+    "documentacao/O que foi feito/vectorBD.md",
     "documentacao/O que foi feito/websocket.py.md",
     "documentacao/O que foi feito/Main.py.md",
     "documentacao/O que foi feito/instalar o micropy no ESP32.md",
@@ -279,9 +291,6 @@
     "FastAPI_do_zero/Parte 2 - Introdução ao desenvolvimento web/8. Introdução ao desenvolvimento web.md",
     "FastAPI + WebSocket/Estudos.md",
     "Estudos/Como construir um RAG.md",
-    "Estudos/RAG.md",
-    "Estudos/Servidores com fastAPI.md",
-    "Estudos/Servidores,  protocolo HTTP, WebSockets e FastAPI.md",
     "Imagens/Pasted image 20260306172724.png",
     "Imagens/Sem título 1.canvas",
     "Imagens/Pasted image 20260218164351.png",
@@ -289,17 +298,8 @@
     "backend/app/Data/1747161471797white-paper-antenas-adaptativas - cópia.pdf",
     "Imagens/Captura de Tela 2026-02-23 às 07.47.59.png",
     "Imagens/Captura de Tela 2025-12-19 às 12.56.22.png",
-    "backend/app/app/__pycache__/ia.cpython-313.pyc",
-    "backend/app/app/test_ia.py",
-    "backend/app/app/install.sh",
     "Imagens/Captura de Tela 2026-02-19 às 10.03.42.png",
-    "backend/app/app/requirements.txt",
-    "backend/app/app/ia.py",
-    "backend/app/app/IC_METAVERSO_Última_versão_(última_mesmo)_(1).ipynb",
-    "backend/IC_METAVERSO_Última_versão_(última_mesmo)_(1).ipynb",
     "Imagens/Captura de Tela 2026-02-19 às 13.02.07.png",
-    "Imagens/Captura de Tela 2026-02-19 às 13.01.25.png",
-    "documentacao/O que foi feito/IC_METAVERSO_Última_versão_(última_mesmo)_(1).ipynb",
     "Sem título 3.canvas",
     "Sem título 2.canvas"
   ]
