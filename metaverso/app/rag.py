@@ -5,10 +5,9 @@ import numpy as np
 import logging
 import re
 import unicodedata
-from sentence_transformers import CrossEncoder
+from sentence_transformers import CrossEncoder, SentenceTransformer
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
-from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
 import chromadb
 import pandas as pd
@@ -27,6 +26,28 @@ from app.config import (
 )
 
 logging.basicConfig(level=logging.INFO)
+
+
+# ============================================================================
+# WRAPPER PARA SENTENCE TRANSFORMERS COM LANGCHAIN
+# ============================================================================
+
+class SentenceTransformerEmbeddings:
+    """Wrapper para usar SentenceTransformer com LangChain"""
+    
+    def __init__(self, model_name: str = "sentence-transformers/multilingual-e5-large"):
+        self.model = SentenceTransformer(model_name)
+    
+    def embed_documents(self, texts: list[str]) -> list[list[float]]:
+        """Embed search docs."""
+        embeddings = self.model.encode(texts, convert_to_tensor=False)
+        return embeddings.tolist()
+    
+    def embed_query(self, text: str) -> list[float]:
+        """Embed query text."""
+        embedding = self.model.encode([text], convert_to_tensor=False)[0]
+        return embedding.tolist()
+
 
 
 # ============================================================================
@@ -547,9 +568,8 @@ def load_pdfs_improved(directory):
 
 
 def setup_vectorstore():
-    embeddings = HuggingFaceEmbeddings(
-        model_name=EMBEDDING_MODEL_NAME,
-        model_kwargs={'device': 'cpu'}
+    embeddings = SentenceTransformerEmbeddings(
+        model_name=EMBEDDING_MODEL_NAME
     )
 
     client = chromadb.PersistentClient(path=CHROMA_PERSIST_DIR)
