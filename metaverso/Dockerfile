@@ -6,23 +6,33 @@ FROM python:3.11-slim
 # Definir diretório de trabalho
 WORKDIR /app
 
+# Tornar o build mais previsível dentro do container
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1
+
 # Instalar dependências do sistema
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     curl \
+    gcc \
+    g++ \
+    git \
     && rm -rf /var/lib/apt/lists/*
 
 # Copiar requirements
 COPY requirements.txt .
 
+# Atualizar tooling do pip antes de resolver dependências mais pesadas
+RUN python -m pip install --upgrade pip setuptools wheel
+
 # Instalar Python packages
-RUN pip install --no-cache-dir -r requirements.txt
+RUN python -m pip install -r requirements.txt
 
 # Copiar aplicação
 COPY app/ ./app/
 
 # Variáveis de ambiente
-ENV PYTHONUNBUFFERED=1
 ENV PORT=8000
 
 # Health check
