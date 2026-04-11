@@ -7,7 +7,7 @@ chromadb==0.4.24
 langchain==0.1.16
 langchain-chroma==0.1.1
 langchain-text-splitters==0.0.2
-langchain-core==0.1.52
+langchain-core>=0.1.52,<0.2
 
 sentence-transformers==2.7.0
 transformers==4.40.2
