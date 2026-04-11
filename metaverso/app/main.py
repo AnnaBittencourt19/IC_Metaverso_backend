@@ -125,6 +125,11 @@ class QuestionInput(BaseModel):
         }
 
 
+class SourceInfo(BaseModel):
+    content: str = Field(..., description="Conteúdo do documento fonte")
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Metadados do documento")
+
+
 class AudioResponse(BaseModel):
     """Resposta para requisições de áudio, incluindo a transcrição"""
     response: str = Field(..., description="Resposta gerada pelo RAG")
@@ -139,11 +144,6 @@ class AudioResponse(BaseModel):
         json_encoders = {
             datetime: lambda v: v.isoformat()
         }
-
-
-class SourceInfo(BaseModel):
-    content: str = Field(..., description="Conteúdo do documento fonte")
-    metadata: Dict[str, Any] = Field(default_factory=dict, description="Metadados do documento")
 
 
 class ResponseOutput(BaseModel):
