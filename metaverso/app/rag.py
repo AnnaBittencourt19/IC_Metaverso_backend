@@ -18,6 +18,7 @@ from app.config import (
     CHROMA_PERSIST_DIR,
     EMBEDDING_MODEL_NAME,
     CROSS_ENCODER_MODEL,
+    ENABLE_RERANKER,
     MIN_CROSS_ENCODER_SCORE,
     MIN_RELATIVE_SCORE,
     MAX_CONTEXT_TOKENS,
@@ -35,7 +36,7 @@ logging.basicConfig(level=logging.INFO)
 class SentenceTransformerEmbeddings:
     """Wrapper para usar SentenceTransformer com LangChain"""
     
-    def __init__(self, model_name: str = "sentence-transformers/multilingual-e5-large"):
+    def __init__(self, model_name: str = "intfloat/multilingual-e5-small"):
         self.model = SentenceTransformer(model_name)
     
     def embed_documents(self, texts: list[str]) -> list[list[float]]:
@@ -641,6 +642,10 @@ class ReRankingRetriever:
             logging.warning("Nenhum documento encontrado na busca inicial")
             return []
 
+        if self.cross_encoder is None:
+            logging.info("Reranker desabilitado, retornando documentos da busca vetorial")
+            return initial_docs[:self.top_k]
+
         pairs = [(query, re.sub(r'^passage: ', '', doc.page_content)) for doc in initial_docs]
         scores = self.cross_encoder.predict(pairs)
         docs_with_scores = []
@@ -923,8 +928,13 @@ retriever = None
 
 def initialize_rag():
     global base_retriever, embeddings, vectorstore, retriever
+    if retriever is not None:
+        return
     base_retriever, embeddings, vectorstore = setup_vectorstore()
-    cross_encoder = CrossEncoder(CROSS_ENCODER_MODEL, device="cpu")
+    cross_encoder = None
+    if ENABLE_RERANKER:
+        logging.info(f"Carregando reranker: {CROSS_ENCODER_MODEL}")
+        cross_encoder = CrossEncoder(CROSS_ENCODER_MODEL, device="cpu")
     retriever = ReRankingRetriever(base_retriever, cross_encoder)
 
 

@@ -10,8 +10,10 @@ PDF_DIR = os.getenv("PDF_DIR", "/var/data/pdfs")
 CHROMA_PERSIST_DIR = os.getenv("CHROMA_PERSIST_DIR", "/var/data/chroma")
 
 # Modelos
-EMBEDDING_MODEL_NAME = "intfloat/multilingual-e5-large"
-CROSS_ENCODER_MODEL = "BAAI/bge-reranker-v2-m3"
+EMBEDDING_MODEL_NAME = os.getenv("EMBEDDING_MODEL_NAME", "intfloat/multilingual-e5-small")
+CROSS_ENCODER_MODEL = os.getenv("CROSS_ENCODER_MODEL", "cross-encoder/ms-marco-MiniLM-L-6-v2")
+ENABLE_RERANKER = os.getenv("ENABLE_RERANKER", "false").lower() == "true"
+EAGER_RAG_INIT = os.getenv("EAGER_RAG_INIT", "false").lower() == "true"
 
 # Parâmetros de Busca e Ranking
 MIN_CROSS_ENCODER_SCORE = 0.15

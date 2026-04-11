@@ -8,6 +8,7 @@ from fastapi import FastAPI, HTTPException, Header, status, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
+from app.config import EAGER_RAG_INIT
 from app.rag import hierarchical_search_and_generate, initialize_rag, process_audio_and_answer
 
 # ============================================================================
@@ -88,8 +89,11 @@ def verify_api_key(x_api_key: Optional[str] = Header(None)) -> str:
 async def startup_event():
     try:
         logger.info("🚀 Iniciando aplicação...")
-        initialize_rag()
-        logger.info("✅ RAG inicializado com sucesso")
+        if EAGER_RAG_INIT:
+            initialize_rag()
+            logger.info("✅ RAG inicializado com sucesso")
+        else:
+            logger.info("⏳ Inicialização do RAG adiada para a primeira requisição")
     except Exception as e:
         logger.error(f"❌ Erro na inicialização: {str(e)}")
         raise
@@ -227,6 +231,7 @@ async def ask(
         verify_api_key(x_api_key)
         
         logger.info(f"📝 Nova pergunta recebida: {input_data.question[:50]}...")
+        initialize_rag()
         
         # Chamar a função RAG
         result = hierarchical_search_and_generate(input_data.question)
@@ -308,6 +313,7 @@ async def ask_audio(
         verify_api_key(x_api_key)
         
         logger.info(f"🎤 Novo arquivo de áudio recebido: {audio_file.filename}")
+        initialize_rag()
         
         # Validar tipo de arquivo
         allowed_audio_types = [
