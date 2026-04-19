@@ -65,12 +65,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "documentacao/O que foi feito/Criar servidor usando Groq Cloud  + Render.com.md",
+                "file": "documentacao/O que foi feito/Teste_Render_Passo_a_Passo.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Criar servidor usando Groq Cloud  + Render.com"
+              "title": "Teste_Render_Passo_a_Passo"
             }
           },
           {
@@ -252,6 +252,15 @@
   },
   "active": "c32398fe66904cf7",
   "lastOpenFiles": [
+    "documentacao/O que foi feito/Metaverso_Explicado_Simples.md",
+    "documentacao/O que foi feito/Teste_Render_Passo_a_Passo.md",
+    "documentacao/O que foi feito/Projeto_Metaverso_Backend_Completo.md",
+    "metaverso/docs/AUDIO_IMPLEMENTATION.md",
+    "metaverso/docs/UNITY_INTEGRATION.md",
+    "metaverso/docs/TESTE_RENDER.md",
+    "metaverso/docs/RENDER_CONFIG.md",
+    "metaverso/docs/README.md",
+    "documentacao/O que foi feito/Criar servidor usando Groq Cloud  + Render.com.md",
     "metaverso/IC_METAVERSO_Última_versão_(última_mesmo)_(1)_(1)_(4)_(3)_(4).ipynb",
     "Captura de Tela 2026-04-07 às 22.36.23.png",
     "metaverso/app/ingest.py",
@@ -262,7 +271,6 @@
     "metaverso/render.yaml",
     "metaverso/requeriments.txt",
     "metaverso/Sem título.md",
-    "documentacao/O que foi feito/Criar servidor usando Groq Cloud  + Render.com.md",
     "metaverso",
     "documentacao/O que foi feito/Opção de entrada de audio na IA.md",
     "documentacao/O que foi feito/vectorBD.md",
@@ -284,18 +292,10 @@
     "Imagens/Captura de Tela 2026-03-11 às 09.04.12.png",
     "FastAPI_do_zero/Parte 1 - Configurando o ambiente de desenvolvimento/8. Simulado sobre a parte 1.md",
     "FastAPI_do_zero/Parte 1 - Configurando o ambiente de desenvolvimento/6. Configurando as ferramentas de desenvolvimento.md",
-    "FastAPI_do_zero/Parte 1 - Configurando o ambiente de desenvolvimento/5. Instalando as ferramentas de desenvolvimento.md",
-    "FastAPI_do_zero/Parte 1 - Configurando o ambiente de desenvolvimento/3. Criando um projeto.md",
-    "FastAPI_do_zero/Parte 1 - Configurando o ambiente de desenvolvimento/2. Instalando as dependências.md",
-    "FastAPI_do_zero/1. Objetivo do curso.md",
-    "FastAPI_do_zero/Parte 2 - Introdução ao desenvolvimento web/8. Introdução ao desenvolvimento web.md",
-    "FastAPI + WebSocket/Estudos.md",
-    "Estudos/Como construir um RAG.md",
     "Imagens/Pasted image 20260306172724.png",
     "Imagens/Sem título 1.canvas",
     "Imagens/Pasted image 20260218164351.png",
     "Imagens/assincrono.canvas",
-    "backend/app/Data/1747161471797white-paper-antenas-adaptativas - cópia.pdf",
     "Imagens/Captura de Tela 2026-02-23 às 07.47.59.png",
     "Imagens/Captura de Tela 2025-12-19 às 12.56.22.png",
     "Imagens/Captura de Tela 2026-02-19 às 10.03.42.png",
