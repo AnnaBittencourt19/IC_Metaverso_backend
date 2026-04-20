@@ -97,24 +97,21 @@ def verify_api_key(x_api_key: Optional[str] = Header(None)) -> str:
 
 @app.on_event("startup")
 async def startup_event():
-    try:
-        logger.info("🚀 Iniciando aplicação...")
-        if EAGER_RAG_INIT:
+    logger.info("🚀 Iniciando aplicação...")
+    if EAGER_RAG_INIT:
+        try:
             initialize_rag()
             logger.info("✅ RAG inicializado com sucesso")
-        else:
-            logger.info("⏳ Inicialização do RAG adiada para a primeira requisição")
-        
-        # Log memory usage
-        try:
-            process = psutil.Process(os.getpid())
-            mem_info = process.memory_info()
-            logger.info(f"📊 Memória inicial: {mem_info.rss / 1024 / 1024:.1f} MB")
-        except:
-            pass
-    except Exception as e:
-        logger.error(f"❌ Erro na inicialização: {str(e)}")
-        raise
+        except Exception as e:
+            logger.error(f"❌ Erro na inicialização do RAG: {str(e)}")
+    else:
+        logger.info("⏳ Inicialização do RAG adiada para a primeira requisição")
+    try:
+        process = psutil.Process(os.getpid())
+        mem_info = process.memory_info()
+        logger.info(f"📊 Memória inicial: {mem_info.rss / 1024 / 1024:.1f} MB")
+    except:
+        pass
 
 # ============================================================================
 # Custom JSON Encoder para serialização de documentos

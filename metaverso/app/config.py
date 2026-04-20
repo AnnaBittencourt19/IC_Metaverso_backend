@@ -31,5 +31,6 @@ LAZY_LOAD_MODELS = True
 # Request timeouts
 REQUEST_TIMEOUT_SECONDS = 30
 
+import logging as _logging
 if not GROQ_API_KEY:
-    raise ValueError("GROQ_API_KEY não está definida nas variáveis de ambiente")
+    _logging.warning("GROQ_API_KEY não está definida - endpoints RAG não funcionarão")
