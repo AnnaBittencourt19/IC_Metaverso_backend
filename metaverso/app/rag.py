@@ -642,6 +642,8 @@ def setup_vectorstore():
         model_name=EMBEDDING_MODEL_NAME
     )
 
+    logging.info(f"🔍 Procurando ChromaDB em: {CHROMA_PERSIST_DIR}")
+    
     client = chromadb.PersistentClient(path=CHROMA_PERSIST_DIR)
 
     try:
@@ -655,29 +657,45 @@ def setup_vectorstore():
         )
         logging.info(f"✅ Banco de dados carregado com {collection.count()} documentos")
 
-    except (ValueError, Exception) as e:
-        if 'does not exist' not in str(e) and 'Coleção vazia' not in str(e):
-            logging.warning(f'Recriando banco: {e}')
-        logging.info("Criando novo banco de dados...")
-        documents = load_pdfs_improved(PDF_DIR)
-        if not documents:
-            raise ValueError(f'Nenhum texto extraído dos PDFs em {PDF_DIR}')
+    except Exception as e:
+        error_msg = str(e)
+        logging.warning(f'⚠️ Erro ao carregar banco existente: {error_msg}')
         
-        chunks = chunk_documents(documents)
-        if not chunks:
-            raise ValueError('Chunks vazios após splitter')
-        
-        logging.info(f"Total de chunks criados: {len(chunks)}")
-        for c in chunks:
-            c.page_content = 'passage: ' + re.sub(r'^(passage: )+', '', c.page_content)
+        # Se a coleção não existe ou está vazia, tenta criar do zero
+        if 'does not exist' in error_msg or 'Coleção vazia' in error_msg:
+            logging.info("📝 Coleção não encontrada, criando nova...")
+            
+            # Tentar carregar PDFs
+            logging.info(f"📂 Procurando PDFs em: {PDF_DIR}")
+            documents = load_pdfs_improved(PDF_DIR)
+            
+            if not documents:
+                # Se não encontrar PDFs locais, registrar erro mas não falhar completamente
+                logging.error(f'❌ Nenhum texto extraído dos PDFs em {PDF_DIR}')
+                logging.warning('💡 Dica: Se está no Render, certifique-se de que os PDFs estão em /var/data/pdfs')
+                # Lançar erro para que o inicializador saiba
+                raise ValueError(f'Nenhum texto extraído dos PDFs em {PDF_DIR}. Verifique se a pasta existe e contém PDFs.')
+            
+            chunks = chunk_documents(documents)
+            if not chunks:
+                raise ValueError('Chunks vazios após splitter')
+            
+            logging.info(f"Total de chunks criados: {len(chunks)}")
+            for c in chunks:
+                c.page_content = 'passage: ' + re.sub(r'^(passage: )+', '', c.page_content)
 
-        vectorstore = Chroma.from_documents(
-            chunks,
-            embeddings,
-            client=client,
-            collection_name="6g_docs"
-        )
-        # Liberar memória após criação
+            vectorstore = Chroma.from_documents(
+                chunks,
+                embeddings,
+                client=client,
+                collection_name="6g_docs"
+            )
+        else:
+            # Erro diferente - propagar
+            raise
+
+    # Liberar memória após criação
+    if 'chunks' in locals():
         del documents
         del chunks
         gc.collect()

@@ -8,12 +8,14 @@ services:
     envVars:
       - key: GROQ_API_KEY
         sync: false
-      - key: CHROMA_PERSIST_DIR
-        value: /var/data/chroma
       - key: API_KEY
         sync: false
+      - key: CHROMA_PERSIST_DIR
+        value: /var/data/chroma
+      - key: PDF_DIR
+        value: /var/data/pdfs
 
 disks:
   - name: chroma-data
     sizeGB: 5
-    mountPath: /var/data/chroma
+    mountPath: /var/data
