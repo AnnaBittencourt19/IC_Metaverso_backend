@@ -7,7 +7,6 @@ import gc
 import psutil
 from typing import Optional, List, Dict, Any
 from datetime import datetime
-from functools import wraps
 from fastapi import FastAPI, HTTPException, Header, status, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -26,32 +25,11 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # ============================================================================
-# Proteção contra timeout
+# Proteção contra timeout - VERSÃO SIMPLIFICADA
 # ============================================================================
 
-class TimeoutError(Exception):
-    pass
-
-def timeout_handler(signum, frame):
-    raise TimeoutError("Operação excedeu o tempo limite")
-
-def with_timeout(seconds=REQUEST_TIMEOUT_SECONDS):
-    """Decorador para proteger requisições contra timeout"""
-    def decorator(func):
-        @wraps(func)
-        async def async_wrapper(*args, **kwargs):
-            try:
-                # Usar asyncio.wait_for em vez de signals para funções async
-                import asyncio
-                return await asyncio.wait_for(func(*args, **kwargs), timeout=seconds)
-            except asyncio.TimeoutError:
-                logger.error(f"⏱️ Timeout: {func.__name__} excedeu {seconds}s")
-                raise HTTPException(
-                    status_code=status.HTTP_504_GATEWAY_TIMEOUT,
-                    detail=f"Operação excedeu o tempo limite de {seconds}s"
-                )
-        return async_wrapper
-    return decorator
+# Nota: FastAPI já tem timeout nativo, vamos usar middleware ao invés de decorator
+# para evitar conflitos com async/await
 
 # ============================================================================
 # Inicialização da aplicação
@@ -274,7 +252,6 @@ async def memory_status():
 
 
 @app.post("/api/v1/ask", response_model=ResponseOutput)
-@with_timeout(seconds=REQUEST_TIMEOUT_SECONDS)
 async def ask(
     input_data: QuestionInput,
     x_api_key: str = Header(None)
@@ -354,7 +331,6 @@ async def ask(
 
 
 @app.post("/api/v1/ask-audio", response_model=AudioResponse)
-@with_timeout(seconds=REQUEST_TIMEOUT_SECONDS + 10)  # +10s para processar áudio
 async def ask_audio(
     audio_file: UploadFile = File(..., description="Arquivo de áudio (MP3, WAV, M4A, etc)"),
     x_api_key: str = Header(None)

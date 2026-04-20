@@ -1,29 +1,39 @@
 # 📝 LISTA DE MODIFICAÇÕES
 
-## 📋 ARQUIVOS MODIFICADOS
+## 📋 ARQUIVOS MODIFICADOS (VERSÃO 1.1.1)
 
 ### 1. `app/config.py` (3 mudanças)
-**Linhas alteradas:** 19-21, 26-32
-
-**Mudanças:**
-```python
-# ANTES:
-MAX_CONTEXT_TOKENS = 3500
-INITIAL_RETRIEVAL_K = 12
-# (sem novo timeout/lazy loading)
-
-# DEPOIS:
-MAX_CONTEXT_TOKENS = 2000      # ← reduzido
-INITIAL_RETRIEVAL_K = 6         # ← reduzido
-LAZY_LOAD_MODELS = True         # ← novo
-REQUEST_TIMEOUT_SECONDS = 30    # ← novo
-```
-
-**Motivo:** Reduzir consumo de memória por requisição
-
----
+**Status:** ✅ OK
 
 ### 2. `app/rag.py` (5 seções modificadas)
+**Status:** ✅ OK
+
+### 3. `app/main.py` (CORRIGIDO - Versão 1.1.1)
+**Mudanças na v1.1.1:**
+- ❌ Removido: Decorador `@with_timeout` (causava erro 500)
+- ❌ Removido: Import `from functools import wraps`
+- ✅ Simplificado: FastAPI usa timeout nativo do Uvicorn
+- ✅ Mantido: Garbage collection em endpoints
+
+**Endpoints agora:**
+```python
+# v1.1.0 (COM ERRO)
+@app.post("/api/v1/ask")
+@with_timeout(seconds=REQUEST_TIMEOUT_SECONDS)
+async def ask(...):
+
+# v1.1.1 (CORRIGIDO)
+@app.post("/api/v1/ask")
+async def ask(...):
+```
+
+**Motivo:** Decorador `@with_timeout` conflitava com async/await do FastAPI
+
+### 4. `requirements.txt` (1 adição)
+**Status:** ✅ OK
+```
+psutil==5.9.6
+```
 
 #### ✏️ Seção 1: Imports (Linhas 1-32)
 **Adicionado:**
