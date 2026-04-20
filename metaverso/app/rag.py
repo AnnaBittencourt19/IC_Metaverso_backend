@@ -1,6 +1,5 @@
 import os
 import glob
-import fitz
 import numpy as np
 import logging
 import re
@@ -8,6 +7,7 @@ import unicodedata
 import gc
 import atexit
 from weakref import WeakValueDictionary
+from pypdf import PdfReader
 from contextlib import contextmanager
 from sentence_transformers import CrossEncoder, SentenceTransformer
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -28,6 +28,7 @@ from app.config import (
     MAX_CONTEXT_TOKENS,
     INITIAL_RETRIEVAL_K,
     GROQ_API_KEY,
+    GROQ_MODEL,
     LAZY_LOAD_MODELS,
     REQUEST_TIMEOUT_SECONDS
 )
@@ -581,34 +582,30 @@ def expand_query_with_embeddings(query, embeddings_model, vectorstore, max_expan
 # SETUP DO VECTORSTORE
 # ============================================================================
 
+def _extract_text_pypdf(filepath):
+    """Extract text from PDF using pypdf"""
+    documents = []
+    try:
+        reader = PdfReader(filepath)
+        for page_num, page in enumerate(reader.pages):
+            text = page.extract_text()
+            if text and len(text.split()) >= 10:
+                documents.append({
+                    'text': text,
+                    'metadata': {
+                        'source': os.path.basename(filepath),
+                        'page': page_num + 1,
+                        'path': filepath,
+                        'extraction_method': 'pypdf'
+                    }
+                })
+    except Exception as e:
+        logging.error(f'Erro ao extrair PDF {filepath}: {e}')
+    return documents
+
+
 def _extract_table_text_fitz(page, page_num):
-    for strategy in ['lines', 'lines_strict', 'text']:
-        try:
-            tables = page.find_tables(strategy=strategy)
-            if not (tables and tables.tables):
-                continue
-            table_text = ''
-            seen_bboxes = set()
-            for i, t in enumerate(tables.tables):
-                try:
-                    bbox_key = tuple(round(v, 1) for v in t.bbox) if hasattr(t, 'bbox') else None
-                    if bbox_key and bbox_key in seen_bboxes:
-                        continue
-                    if bbox_key:
-                        seen_bboxes.add(bbox_key)
-                    df = t.to_pandas()
-                    if df is None or df.empty or df.shape[1] < 2:
-                        continue
-                    df = df.dropna(how='all').dropna(axis=1, how='all')
-                    if df.empty:
-                        continue
-                    table_text += f'\n**[Tabela {i+1} - Página {page_num+1}]**\n\n{df.to_markdown(index=False)}\n'
-                except Exception:
-                    pass
-            if table_text:
-                return table_text, strategy
-        except Exception:
-            pass
+    """Legacy function - now disabled, tables extracted via text extraction"""
     return '', 'none'
 
 
@@ -618,47 +615,23 @@ def load_pdfs_improved(directory):
     if not files:
         logging.warning(f'Nenhum PDF encontrado em {directory}')
         return documents
-    total_tables = 0
+    
     for filepath in files:
-        doc = None
         try:
             logging.info(f'Processando {os.path.basename(filepath)}...')
-            doc = fitz.open(filepath)
-            try:
-                for page_num, page in enumerate(doc):
-                    try:
-                        table_text, strategy = _extract_table_text_fitz(page, page_num)
-                        if strategy != 'none':
-                            total_tables += 1
-                        text = page.get_text("text", flags=fitz.TEXT_DEHYPHENATE)
-                        combined = (table_text + '\n' + text) if table_text else text
-                        clean = clean_text_content(combined)
-                        if clean and len(clean.split()) >= 10:
-                            documents.append({
-                                'text': clean,
-                                'metadata': {
-                                    'source': os.path.basename(filepath),
-                                    'page': page_num + 1,
-                                    'path': filepath,
-                                    'tables_count': 1 if table_text else 0,
-                                    'extraction_strategy': strategy
-                                }
-                            })
-                    except Exception as e:
-                        logging.error(f'Erro página {page_num+1} de {os.path.basename(filepath)}: {e}')
-            finally:
-                if doc:
-                    doc.close()
-                    del doc
-                    gc.collect()
+            pdf_docs = _extract_text_pypdf(filepath)
+            
+            for doc in pdf_docs:
+                clean_text = clean_text_content(doc['text'])
+                if clean_text and len(clean_text.split()) >= 10:
+                    documents.append({
+                        'text': clean_text,
+                        'metadata': doc['metadata']
+                    })
         except Exception as e:
-            logging.error(f'Erro ao abrir {filepath}: {e}')
-        finally:
-            if doc:
-                doc.close()
-                del doc
+            logging.error(f'Erro ao processar {filepath}: {e}')
     
-    logging.info(f'Páginas extraídas: {len(documents)} | Tabelas detectadas: {total_tables}')
+    logging.info(f'Páginas extraídas: {len(documents)}')
     gc.collect()
     return documents
 
@@ -916,7 +889,7 @@ def generate_answer(prompt, metadata=None):
         ]
 
         response = groq_client.chat.completions.create(
-            model="mixtral-8x7b-32768",
+            model=GROQ_MODEL,
             messages=messages,
             temperature=0.3,
             max_tokens=500,
@@ -1043,7 +1016,7 @@ def initialize_rag():
     global base_retriever, embeddings, vectorstore, retriever
     if retriever is not None:
         logging.info("RAG já inicializado, reutilizando instância")
-        return
+        return retriever
     
     try:
         logging.info("🚀 Inicializando RAG com lazy loading...")
@@ -1056,6 +1029,7 @@ def initialize_rag():
         
         retriever = ReRankingRetriever(base_retriever, cross_encoder)
         logging.info("✅ RAG inicializado com sucesso (lazy loading ativo)")
+        return retriever
     except Exception as e:
         logging.error(f"❌ Erro ao inicializar RAG: {str(e)}", exc_info=True)
         raise
