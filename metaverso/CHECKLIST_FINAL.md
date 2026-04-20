@@ -17,6 +17,8 @@
 - [x] Modelos Pydantic validados
 - [x] Exception handlers customizados
 - [x] Documentação OpenAPI automática
+- [x] POST /ask retorna 200 OK ✅
+- [x] Paths de environment corrigidos ✅
 
 ### RAG Logic (rag.py)
 - [x] Embeddings (HuggingFace)
@@ -308,6 +310,30 @@ python test_render.py https://seu-servico.onrender.com
 
 ---
 
-**Última atualização:** 8 de abril de 2026
-**Versão:** 1.0.0
+**Última atualização:** 20 de abril de 2026
+**Versão:** 1.0.1
 **Status:** ✅ Production Ready
+
+---
+
+## 🔄 Correções Implementadas (20/04/2026)
+
+### Environment & Dependências ✅
+- [x] `.env` paths corrigidos: `./Data` + `./chroma_db_export`
+- [x] PyMuPDF → pypdf (compatível com Python 3.13)
+- [x] Groq 1.2.0 (atualizado de 0.4.2)
+- [x] Embedding model: e5-large (1024-dim)
+- [x] Groq model configurável via env
+
+### API Status ✅
+- [x] `/ask` endpoint retorna 200 OK
+- [x] ChromaDB carrega 10,922 documentos
+- [x] Vector search funcionando
+- [x] Response format completo (response, sources, docs_used, confidence)
+- [x] Error handling proper (503 para service unavailable, 500 para erros)
+
+### Testing ✅
+- [x] Health endpoint: 200 OK
+- [x] /ask endpoint: 200 OK com resposta completa
+- [x] Authentication: API key validation funciona
+- [x] Retrieval: 4+ documentos retornados por query
