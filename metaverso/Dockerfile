@@ -29,11 +29,13 @@ RUN python -m pip install --upgrade pip setuptools wheel
 # Instalar Python packages
 RUN python -m pip install -r requirements.txt
 
-# Copiar aplicação
+# Copiar aplicação e dados
 COPY app/ ./app/
+COPY chroma_db_export/ ./chroma_db_export/
 
 # Variáveis de ambiente
 ENV PORT=8000
+ENV CHROMA_PERSIST_DIR=./chroma_db_export
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
