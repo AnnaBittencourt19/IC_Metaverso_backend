@@ -277,10 +277,25 @@ async def ask(
         verify_api_key(x_api_key)
         
         logger.info(f"📝 Nova pergunta recebida: {input_data.question[:50]}...")
-        initialize_rag()
+        
+        try:
+            initialize_rag()
+        except Exception as e:
+            logger.error(f"❌ Erro ao inicializar RAG: {str(e)}", exc_info=True)
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=f"Erro ao inicializar sistema RAG: {str(e)}"
+            )
         
         # Chamar a função RAG
-        result = hierarchical_search_and_generate(input_data.question)
+        try:
+            result = hierarchical_search_and_generate(input_data.question)
+        except Exception as e:
+            logger.error(f"❌ Erro ao processar pergunta: {str(e)}", exc_info=True)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Erro ao processar a pergunta: {str(e)}"
+            )
         
         # Extrair informações
         docs = result.get('docs', [])
@@ -363,7 +378,15 @@ async def ask_audio(
         verify_api_key(x_api_key)
         
         logger.info(f"🎤 Novo arquivo de áudio recebido: {audio_file.filename}")
-        initialize_rag()
+        
+        try:
+            initialize_rag()
+        except Exception as e:
+            logger.error(f"❌ Erro ao inicializar RAG: {str(e)}", exc_info=True)
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=f"Erro ao inicializar sistema RAG: {str(e)}"
+            )
         
         # Validar tipo de arquivo
         allowed_audio_types = [

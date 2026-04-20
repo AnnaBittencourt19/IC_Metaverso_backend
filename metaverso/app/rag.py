@@ -836,6 +836,11 @@ Lembre-se: O usuário quer apenas a RESPOSTA, não quer saber sobre suas fontes 
 
 def query_documents(question):
     try:
+        # Verificar se retriever foi inicializado
+        if retriever is None:
+            logging.error("❌ Retriever não inicializado!")
+            raise ValueError("RAG não foi inicializado corretamente")
+        
         relevant_docs = retriever.get_relevant_documents(question)
         pdf_docs = []
         model_docs = []
@@ -1040,16 +1045,20 @@ def initialize_rag():
         logging.info("RAG já inicializado, reutilizando instância")
         return
     
-    logging.info("🚀 Inicializando RAG com lazy loading...")
-    base_retriever, embeddings, vectorstore = setup_vectorstore()
-    
-    # CrossEncoder será carregado apenas quando necessário (lazy)
-    cross_encoder = None
-    if ENABLE_RERANKER:
-        logging.info(f"📦 Reranker será carregado sob demanda: {CROSS_ENCODER_MODEL}")
-    
-    retriever = ReRankingRetriever(base_retriever, cross_encoder)
-    logging.info("✅ RAG inicializado com sucesso (lazy loading ativo)")
+    try:
+        logging.info("🚀 Inicializando RAG com lazy loading...")
+        base_retriever, embeddings, vectorstore = setup_vectorstore()
+        
+        # CrossEncoder será carregado apenas quando necessário (lazy)
+        cross_encoder = None
+        if ENABLE_RERANKER:
+            logging.info(f"📦 Reranker será carregado sob demanda: {CROSS_ENCODER_MODEL}")
+        
+        retriever = ReRankingRetriever(base_retriever, cross_encoder)
+        logging.info("✅ RAG inicializado com sucesso (lazy loading ativo)")
+    except Exception as e:
+        logging.error(f"❌ Erro ao inicializar RAG: {str(e)}", exc_info=True)
+        raise
 
 
 # ============================================================================
