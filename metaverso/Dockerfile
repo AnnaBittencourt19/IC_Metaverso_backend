@@ -35,7 +35,8 @@ COPY chroma_db_export/ ./chroma_db_export/
 
 # Variáveis de ambiente
 ENV PORT=8000
-ENV CHROMA_PERSIST_DIR=./chroma_db_export
+ENV CHROMA_PERSIST_DIR=/app/chroma_db_export
+ENV PDF_DIR=/app/Data
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
