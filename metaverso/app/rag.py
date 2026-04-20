@@ -5,6 +5,10 @@ import numpy as np
 import logging
 import re
 import unicodedata
+import gc
+import atexit
+from weakref import WeakValueDictionary
+from contextlib import contextmanager
 from sentence_transformers import CrossEncoder, SentenceTransformer
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
@@ -23,10 +27,67 @@ from app.config import (
     MIN_RELATIVE_SCORE,
     MAX_CONTEXT_TOKENS,
     INITIAL_RETRIEVAL_K,
-    GROQ_API_KEY
+    GROQ_API_KEY,
+    LAZY_LOAD_MODELS,
+    REQUEST_TIMEOUT_SECONDS
 )
 
 logging.basicConfig(level=logging.INFO)
+
+# ============================================================================
+# LAZY LOADING E GERENCIAMENTO DE RECURSOS
+# ============================================================================
+
+class ModelManager:
+    """Gerencia carregamento lazy de modelos para economizar memória"""
+    
+    _instance = None
+    _embeddings = None
+    _cross_encoder = None
+    _groq_client = None
+    
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+    
+    @classmethod
+    def get_embeddings(cls):
+        """Lazy load embeddings model"""
+        if cls._embeddings is None:
+            if not LAZY_LOAD_MODELS:
+                logging.warning("⚠️ LAZY_LOAD_MODELS desabilitado - carregando modelo todo")
+            logging.info(f"📦 Carregando modelo de embeddings: {EMBEDDING_MODEL_NAME}")
+            cls._embeddings = SentenceTransformer(EMBEDDING_MODEL_NAME)
+        return cls._embeddings
+    
+    @classmethod
+    def get_cross_encoder(cls):
+        """Lazy load cross encoder"""
+        if cls._cross_encoder is None and ENABLE_RERANKER:
+            logging.info(f"📦 Carregando reranker: {CROSS_ENCODER_MODEL}")
+            cls._cross_encoder = CrossEncoder(CROSS_ENCODER_MODEL, device="cpu")
+        return cls._cross_encoder
+    
+    @classmethod
+    def get_groq_client(cls):
+        """Lazy load Groq client"""
+        if cls._groq_client is None:
+            logging.info("📦 Inicializando cliente Groq")
+            cls._groq_client = Groq(api_key=GROQ_API_KEY)
+        return cls._groq_client
+    
+    @classmethod
+    def cleanup(cls):
+        """Libera memória dos modelos"""
+        logging.info("🧹 Limpando modelos da memória")
+        cls._embeddings = None
+        cls._cross_encoder = None
+        cls._groq_client = None
+        gc.collect()
+
+# Registrar cleanup no exit
+atexit.register(ModelManager.cleanup)
 
 
 # ============================================================================
@@ -34,20 +95,44 @@ logging.basicConfig(level=logging.INFO)
 # ============================================================================
 
 class SentenceTransformerEmbeddings:
-    """Wrapper para usar SentenceTransformer com LangChain"""
+    """Wrapper para usar SentenceTransformer com LangChain - com lazy loading"""
     
     def __init__(self, model_name: str = "intfloat/multilingual-e5-small"):
-        self.model = SentenceTransformer(model_name)
+        self.model_name = model_name
+        self._model = None
+    
+    @property
+    def model(self):
+        """Lazy load do modelo"""
+        if self._model is None:
+            logging.info(f"📦 Carregando SentenceTransformer: {self.model_name}")
+            self._model = SentenceTransformer(self.model_name)
+        return self._model
     
     def embed_documents(self, texts: list[str]) -> list[list[float]]:
         """Embed search docs."""
-        embeddings = self.model.encode(texts, convert_to_tensor=False)
-        return embeddings.tolist()
+        try:
+            embeddings = self.model.encode(texts, convert_to_tensor=False, batch_size=32)
+            return embeddings.tolist()
+        except Exception as e:
+            logging.error(f"Erro ao embedding documents: {e}")
+            raise
     
     def embed_query(self, text: str) -> list[float]:
         """Embed query text."""
-        embedding = self.model.encode([text], convert_to_tensor=False)[0]
-        return embedding.tolist()
+        try:
+            embedding = self.model.encode([text], convert_to_tensor=False)[0]
+            return embedding.tolist()
+        except Exception as e:
+            logging.error(f"Erro ao embedding query: {e}")
+            raise
+    
+    def cleanup(self):
+        """Libera memória do modelo"""
+        if self._model is not None:
+            logging.info("🧹 Limpando SentenceTransformer da memória")
+            self._model = None
+            gc.collect()
 
 
 
@@ -535,6 +620,7 @@ def load_pdfs_improved(directory):
         return documents
     total_tables = 0
     for filepath in files:
+        doc = None
         try:
             logging.info(f'Processando {os.path.basename(filepath)}...')
             doc = fitz.open(filepath)
@@ -561,14 +647,24 @@ def load_pdfs_improved(directory):
                     except Exception as e:
                         logging.error(f'Erro página {page_num+1} de {os.path.basename(filepath)}: {e}')
             finally:
-                doc.close()
+                if doc:
+                    doc.close()
+                    del doc
+                    gc.collect()
         except Exception as e:
             logging.error(f'Erro ao abrir {filepath}: {e}')
+        finally:
+            if doc:
+                doc.close()
+                del doc
+    
     logging.info(f'Páginas extraídas: {len(documents)} | Tabelas detectadas: {total_tables}')
+    gc.collect()
     return documents
 
 
 def setup_vectorstore():
+    """Setup vectorstore com gerenciamento de memória"""
     embeddings = SentenceTransformerEmbeddings(
         model_name=EMBEDDING_MODEL_NAME
     )
@@ -584,7 +680,7 @@ def setup_vectorstore():
             collection_name="6g_docs",
             embedding_function=embeddings
         )
-        logging.info(f"Banco de dados carregado com {collection.count()} documentos")
+        logging.info(f"✅ Banco de dados carregado com {collection.count()} documentos")
 
     except (ValueError, Exception) as e:
         if 'does not exist' not in str(e) and 'Coleção vazia' not in str(e):
@@ -593,9 +689,11 @@ def setup_vectorstore():
         documents = load_pdfs_improved(PDF_DIR)
         if not documents:
             raise ValueError(f'Nenhum texto extraído dos PDFs em {PDF_DIR}')
+        
         chunks = chunk_documents(documents)
         if not chunks:
             raise ValueError('Chunks vazios após splitter')
+        
         logging.info(f"Total de chunks criados: {len(chunks)}")
         for c in chunks:
             c.page_content = 'passage: ' + re.sub(r'^(passage: )+', '', c.page_content)
@@ -606,6 +704,10 @@ def setup_vectorstore():
             client=client,
             collection_name="6g_docs"
         )
+        # Liberar memória após criação
+        del documents
+        del chunks
+        gc.collect()
 
     base_retriever = vectorstore.as_retriever(search_kwargs={'k': INITIAL_RETRIEVAL_K})
     logging.info(f"Retriever configurado para buscar {INITIAL_RETRIEVAL_K} documentos inicialmente")
@@ -617,7 +719,7 @@ def setup_vectorstore():
 # ============================================================================
 
 class ReRankingRetriever:
-    def __init__(self, base_retriever, cross_encoder, top_k=4):
+    def __init__(self, base_retriever, cross_encoder=None, top_k=4):
         self.base_retriever = base_retriever
         self.cross_encoder = cross_encoder
         self.top_k = top_k
@@ -642,12 +744,15 @@ class ReRankingRetriever:
             logging.warning("Nenhum documento encontrado na busca inicial")
             return []
 
-        if self.cross_encoder is None:
+        # Usar reranker se disponível
+        cross_encoder = self.cross_encoder or (ModelManager.get_cross_encoder() if ENABLE_RERANKER else None)
+        
+        if cross_encoder is None:
             logging.info("Reranker desabilitado, retornando documentos da busca vetorial")
             return initial_docs[:self.top_k]
 
         pairs = [(query, re.sub(r'^passage: ', '', doc.page_content)) for doc in initial_docs]
-        scores = self.cross_encoder.predict(pairs)
+        scores = cross_encoder.predict(pairs)
         docs_with_scores = []
         for doc, score in zip(initial_docs, scores):
             source = doc.metadata.get('source', 'desconhecido') if hasattr(doc, 'metadata') else 'desconhecido'
@@ -797,7 +902,8 @@ def generate_answer(prompt, metadata=None):
         context_end = prompt.find('\n\nPergunta:')
         context = prompt[context_start:context_end].strip()
 
-        groq_client = Groq(api_key=GROQ_API_KEY)
+        # Usar lazy loading do Groq client
+        groq_client = ModelManager.get_groq_client()
 
         messages = [
             {"role": "system", "content": SYSTEM_PROMPT},
@@ -808,7 +914,8 @@ def generate_answer(prompt, metadata=None):
             model="mixtral-8x7b-32768",
             messages=messages,
             temperature=0.3,
-            max_tokens=500
+            max_tokens=500,
+            timeout=REQUEST_TIMEOUT_SECONDS
         )
 
         answer = response.choices[0].message.content.strip()
@@ -927,15 +1034,22 @@ vectorstore = None
 retriever = None
 
 def initialize_rag():
+    """Inicializa o RAG com lazy loading de modelos"""
     global base_retriever, embeddings, vectorstore, retriever
     if retriever is not None:
+        logging.info("RAG já inicializado, reutilizando instância")
         return
+    
+    logging.info("🚀 Inicializando RAG com lazy loading...")
     base_retriever, embeddings, vectorstore = setup_vectorstore()
+    
+    # CrossEncoder será carregado apenas quando necessário (lazy)
     cross_encoder = None
     if ENABLE_RERANKER:
-        logging.info(f"Carregando reranker: {CROSS_ENCODER_MODEL}")
-        cross_encoder = CrossEncoder(CROSS_ENCODER_MODEL, device="cpu")
+        logging.info(f"📦 Reranker será carregado sob demanda: {CROSS_ENCODER_MODEL}")
+    
     retriever = ReRankingRetriever(base_retriever, cross_encoder)
+    logging.info("✅ RAG inicializado com sucesso (lazy loading ativo)")
 
 
 # ============================================================================
@@ -958,7 +1072,8 @@ def transcribe_audio(audio_file_path: str) -> str:
     try:
         logging.info(f"🎤 Iniciando transcrição de áudio: {audio_file_path}")
         
-        client = Groq()
+        # Usar lazy loading do Groq client
+        client = ModelManager.get_groq_client()
         
         # Abrir arquivo de áudio
         with open(audio_file_path, "rb") as audio_file:

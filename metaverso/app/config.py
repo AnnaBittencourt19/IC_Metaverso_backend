@@ -18,12 +18,18 @@ EAGER_RAG_INIT = os.getenv("EAGER_RAG_INIT", "false").lower() == "true"
 # Parâmetros de Busca e Ranking
 MIN_CROSS_ENCODER_SCORE = 0.15
 MIN_RELATIVE_SCORE = 0.20
-MAX_CONTEXT_TOKENS = 3500
-INITIAL_RETRIEVAL_K = 12
+MAX_CONTEXT_TOKENS = 2000  # Reduzido de 3500 para economizar memória
+INITIAL_RETRIEVAL_K = 6    # Reduzido de 12 para economizar memória
 
 # API Keys
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 GROQ_MODEL = "mixtral-8x7b-32768"
+
+# Lazy Loading - modelos são carregados apenas quando necessário
+LAZY_LOAD_MODELS = True
+
+# Request timeouts
+REQUEST_TIMEOUT_SECONDS = 30
 
 if not GROQ_API_KEY:
     raise ValueError("GROQ_API_KEY não está definida nas variáveis de ambiente")

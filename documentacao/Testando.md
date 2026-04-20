@@ -1,0 +1,4 @@
+- Testes feitos do servidor usando o postman 
+- Teste de requisição:
+	- ![[Captura de Tela 2026-04-20 às 10.17.38.png]]
+- 

@@ -2,13 +2,17 @@ import logging
 import json
 import os
 import tempfile
+import signal
+import gc
+import psutil
 from typing import Optional, List, Dict, Any
 from datetime import datetime
+from functools import wraps
 from fastapi import FastAPI, HTTPException, Header, status, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
-from app.config import EAGER_RAG_INIT
+from app.config import EAGER_RAG_INIT, REQUEST_TIMEOUT_SECONDS
 from app.rag import hierarchical_search_and_generate, initialize_rag, process_audio_and_answer
 
 # ============================================================================
@@ -20,6 +24,34 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+# ============================================================================
+# Proteção contra timeout
+# ============================================================================
+
+class TimeoutError(Exception):
+    pass
+
+def timeout_handler(signum, frame):
+    raise TimeoutError("Operação excedeu o tempo limite")
+
+def with_timeout(seconds=REQUEST_TIMEOUT_SECONDS):
+    """Decorador para proteger requisições contra timeout"""
+    def decorator(func):
+        @wraps(func)
+        async def async_wrapper(*args, **kwargs):
+            try:
+                # Usar asyncio.wait_for em vez de signals para funções async
+                import asyncio
+                return await asyncio.wait_for(func(*args, **kwargs), timeout=seconds)
+            except asyncio.TimeoutError:
+                logger.error(f"⏱️ Timeout: {func.__name__} excedeu {seconds}s")
+                raise HTTPException(
+                    status_code=status.HTTP_504_GATEWAY_TIMEOUT,
+                    detail=f"Operação excedeu o tempo limite de {seconds}s"
+                )
+        return async_wrapper
+    return decorator
 
 # ============================================================================
 # Inicialização da aplicação
@@ -94,6 +126,14 @@ async def startup_event():
             logger.info("✅ RAG inicializado com sucesso")
         else:
             logger.info("⏳ Inicialização do RAG adiada para a primeira requisição")
+        
+        # Log memory usage
+        try:
+            process = psutil.Process(os.getpid())
+            mem_info = process.memory_info()
+            logger.info(f"📊 Memória inicial: {mem_info.rss / 1024 / 1024:.1f} MB")
+        except:
+            pass
     except Exception as e:
         logger.error(f"❌ Erro na inicialização: {str(e)}")
         raise
@@ -205,7 +245,36 @@ async def health():
     )
 
 
+@app.get("/api/v1/memory")
+async def memory_status():
+    """Monitora uso de memória da aplicação"""
+    try:
+        process = psutil.Process(os.getpid())
+        mem_info = process.memory_info()
+        mem_percent = process.memory_percent()
+        
+        return {
+            "status": "ok",
+            "memory": {
+                "rss_mb": round(mem_info.rss / 1024 / 1024, 2),  # Resident Set Size
+                "vms_mb": round(mem_info.vms / 1024 / 1024, 2),  # Virtual Memory Size
+                "percent": round(mem_percent, 2)
+            },
+            "gc_stats": {
+                "collections": gc.get_count(),
+                "objects": len(gc.get_objects())
+            }
+        }
+    except Exception as e:
+        logger.error(f"Erro ao obter memória: {e}")
+        return {
+            "status": "error",
+            "detail": str(e)
+        }
+
+
 @app.post("/api/v1/ask", response_model=ResponseOutput)
+@with_timeout(seconds=REQUEST_TIMEOUT_SECONDS)
 async def ask(
     input_data: QuestionInput,
     x_api_key: str = Header(None)
@@ -267,6 +336,10 @@ async def ask(
         )
         
         logger.info(f"✅ Resposta gerada com sucesso - {docs_used} documentos usados")
+        
+        # Forçar garbage collection após requisição
+        gc.collect()
+        
         return response_data
         
     except HTTPException as e:
@@ -281,6 +354,7 @@ async def ask(
 
 
 @app.post("/api/v1/ask-audio", response_model=AudioResponse)
+@with_timeout(seconds=REQUEST_TIMEOUT_SECONDS + 10)  # +10s para processar áudio
 async def ask_audio(
     audio_file: UploadFile = File(..., description="Arquivo de áudio (MP3, WAV, M4A, etc)"),
     x_api_key: str = Header(None)
@@ -371,6 +445,10 @@ async def ask_audio(
             )
             
             logger.info(f"✅ Áudio processado com sucesso - {docs_used} documentos usados")
+            
+            # Forçar garbage collection após requisição
+            gc.collect()
+            
             return response_data
             
         finally:
