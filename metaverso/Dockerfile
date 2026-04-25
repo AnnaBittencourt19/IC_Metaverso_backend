@@ -29,14 +29,17 @@ RUN python -m pip install --upgrade pip setuptools wheel
 # Instalar Python packages
 RUN python -m pip install -r requirements.txt
 
-# Copiar aplicação e dados
+# Copiar aplicação e PDFs
 COPY app/ ./app/
-COPY chroma_db_export/ ./chroma_db_export/
+COPY Data/ ./Data/
 
 # Variáveis de ambiente
 ENV PORT=8000
 ENV CHROMA_PERSIST_DIR=/app/chroma_db_export
 ENV PDF_DIR=/app/Data
+
+# Rodar ingestão durante o build (cria o ChromaDB dentro da imagem)
+RUN python build_ingest.py
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
