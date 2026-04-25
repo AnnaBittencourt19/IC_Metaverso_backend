@@ -42,15 +42,14 @@ env/
 *~
 .DS_Store
 
-# ChromaDB
+# ChromaDB (apenas pasta local de dev, não a exportada para produção)
 chroma_db/
 *.db
-*.sqlite
-*.sqlite3
+# NÃO ignorar chroma_db_export/ - necessário para o deploy
 
 # PDFs for testing
 pdfs/
-*.pdf
+# NÃO ignorar Data/*.pdf - necessário para o build no Render
 
 # Logs
 *.log
