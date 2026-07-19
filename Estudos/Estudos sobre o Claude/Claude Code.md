@@ -20,4 +20,4 @@ claude
 - ```/compact```: Analisa a conversa toda, mantém as informações mais importantes (para diminuir o tamanho do contexto)
 - ```/clear```: Começar uma nova conversa/sessão
 - ```/resume```: Ver históricos de conversa
-- 
+- Documento ```claude.md```: 
