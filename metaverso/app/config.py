@@ -10,7 +10,10 @@ PDF_DIR = os.getenv("PDF_DIR", "./Data")
 CHROMA_PERSIST_DIR = os.getenv("CHROMA_PERSIST_DIR", "./chroma_db_export")
 
 # Modelos
-EMBEDDING_MODEL_NAME = os.getenv("EMBEDDING_MODEL_NAME", "intfloat/multilingual-e5-large")
+# multilingual-e5-large (560M params, ~2.2GB em memória) estoura o limite de
+# 512MB do free tier do Render tanto no build (ingestão) quanto no runtime
+# (embedding de query) — troquei para o small (118M params, ~470MB) por isso.
+EMBEDDING_MODEL_NAME = os.getenv("EMBEDDING_MODEL_NAME", "intfloat/multilingual-e5-small")
 # bge-reranker-v2-m3: multilíngue (PT+EN), compatível com a mesma API
 # CrossEncoder do sentence-transformers. O antigo ms-marco-MiniLM-L-6-v2 é
 # treinado só em inglês, então rankeava mal texto em português quando o
