@@ -29,8 +29,9 @@ RUN python -m pip install --upgrade pip setuptools wheel
 # Instalar Python packages
 RUN python -m pip install -r requirements.txt
 
-# Copiar aplicação e PDFs
+# Copiar aplicação, script de ingestão e PDFs
 COPY app/ ./app/
+COPY build_ingest.py .
 COPY Data/ ./Data/
 
 # Variáveis de ambiente

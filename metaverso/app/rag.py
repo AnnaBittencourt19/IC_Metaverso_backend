@@ -25,7 +25,7 @@ from app.config import (
     ENABLE_RERANKER,
     MIN_CROSS_ENCODER_SCORE,
     MIN_RELATIVE_SCORE,
-    MAX_CONTEXT_TOKENS,
+    MAX_CONTEXT_CHARS,
     INITIAL_RETRIEVAL_K,
     GROQ_API_KEY,
     GROQ_MODEL,
@@ -46,12 +46,12 @@ class ModelManager:
     _embeddings = None
     _cross_encoder = None
     _groq_client = None
-    
+
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
         return cls._instance
-    
+
     @classmethod
     def get_embeddings(cls):
         """Lazy load embeddings model"""
@@ -61,7 +61,7 @@ class ModelManager:
             logging.info(f"📦 Carregando modelo de embeddings: {EMBEDDING_MODEL_NAME}")
             cls._embeddings = SentenceTransformer(EMBEDDING_MODEL_NAME)
         return cls._embeddings
-    
+
     @classmethod
     def get_cross_encoder(cls):
         """Lazy load cross encoder"""
@@ -69,7 +69,7 @@ class ModelManager:
             logging.info(f"📦 Carregando reranker: {CROSS_ENCODER_MODEL}")
             cls._cross_encoder = CrossEncoder(CROSS_ENCODER_MODEL, device="cpu")
         return cls._cross_encoder
-    
+
     @classmethod
     def get_groq_client(cls):
         """Lazy load Groq client"""
@@ -77,7 +77,7 @@ class ModelManager:
             logging.info("📦 Inicializando cliente Groq")
             cls._groq_client = Groq(api_key=GROQ_API_KEY)
         return cls._groq_client
-    
+
     @classmethod
     def cleanup(cls):
         """Libera memória dos modelos"""
@@ -148,54 +148,6 @@ def clean_text_content(text):
     text = re.sub(r'\n{3,}', '\n\n', text)
     lines = [line.strip() for line in text.split('\n') if line.strip()]
     return '\n'.join(lines)
-
-
-def find_table_caption(page, table_bbox, max_distance=50):
-    text_blocks = page.get_text("blocks")
-    table_top = table_bbox[1]
-
-    for block in text_blocks:
-        if len(block) >= 5:
-            block_bottom = block[3]
-            if 0 < (table_top - block_bottom) < max_distance:
-                text = block[4].strip()
-                if re.match(r'^(Tabela|Table|Quadro)\s*\d+', text, re.IGNORECASE):
-                    return text
-    return None
-
-
-def sanitize_cell_content(cell_content):
-    if cell_content is None:
-        return ""
-
-    cell_str = str(cell_content).strip()
-    cell_str = cell_str.replace('\n', '<br>').replace('\r', '<br>')
-    cell_str = re.sub(r'<br>\s*<br>', '<br>', cell_str)
-    cell_str = cell_str.replace('|', '\\|')
-
-    return cell_str
-
-
-def extract_tables_markdown(tables, page_num, page=None):
-    table_text = ""
-    if not tables:
-        return table_text
-    for table_idx, table in enumerate(tables):
-        try:
-            caption = None
-            if page and hasattr(table, 'bbox'):
-                caption = find_table_caption(page, table.bbox)
-            df = table.to_pandas()
-            if df is None or df.empty:
-                continue
-            header = f"**[{caption if caption else f'Tabela {table_idx + 1}'} - Página {page_num + 1}]**\n\n"
-            table_md = df.to_markdown(index=False)
-            table_text += f"\n{header}{table_md}\n"
-        except Exception as e:
-            logging.error(f"Erro ao processar tabela {table_idx + 1} na página {page_num + 1}: {str(e)}")
-            continue
-
-    return table_text
 
 
 def chunk_documents(documents):
@@ -519,63 +471,29 @@ def find_glossary_matches(query, max_matches=3):
     return unique_matches[:max_matches]
 
 
-def expand_query(query, embeddings_model=None, vectorstore=None):
+def expand_query(query):
     matches = find_glossary_matches(query, max_matches=3)
 
-    if matches:
-        expansion_terms = []
-        for key, synonyms in matches:
-            expansion_terms.extend(synonyms[:3])
-
-        seen = set()
-        unique_expansions = []
-        for term in expansion_terms:
-            term_lower = term.lower()
-            if term_lower not in seen:
-                seen.add(term_lower)
-                unique_expansions.append(term)
-
-        expanded = f"{query} {' '.join(unique_expansions[:5])}"
-        logging.debug(f"Expansão glossário: {len(matches)} correspondência(s) encontrada(s)")
-        logging.debug(f"Termos expandidos: {unique_expansions[:5]}")
-        return expanded
-
-    if embeddings_model and vectorstore:
-        logging.debug("Nenhuma correspondência de glossário, usando expansão por embeddings")
-        return expand_query_with_embeddings(query, embeddings_model, vectorstore)
-
-    logging.debug(f"Nenhuma expansão disponível para: {query}")
-    return query
-
-
-def expand_query_with_embeddings(query, embeddings_model, vectorstore, max_expansions=3):
-    try:
-        e5_query = query if query.startswith('query: ') else f'query: {query}'
-        initial_results = vectorstore.similarity_search(e5_query, k=20)
-        candidate_terms = set()
-        for doc in initial_results[:10]:
-            words = re.findall(r'\b[a-záàâãéêíóôõúç]{4,}\b', doc.page_content.lower())
-            candidate_terms.update(words[:5])
-
-        query_embedding = embeddings_model.embed_query(query)
-        term_scores = []
-
-        for term in list(candidate_terms)[:50]:
-            if term not in query.lower():
-                term_embedding = embeddings_model.embed_query(term)
-                similarity = np.dot(query_embedding, term_embedding) / (
-                    np.linalg.norm(query_embedding) * np.linalg.norm(term_embedding)
-                )
-                if similarity > 0.6:
-                    term_scores.append((term, similarity))
-
-        term_scores.sort(key=lambda x: x[1], reverse=True)
-        expansion_terms = [term for term, _ in term_scores[:max_expansions]]
-        return f"{query} {' '.join(expansion_terms)}"
-
-    except Exception as e:
-        logging.warning(f"Erro na expansão: {e}")
+    if not matches:
+        logging.debug(f"Nenhuma expansão disponível para: {query}")
         return query
+
+    expansion_terms = []
+    for key, synonyms in matches:
+        expansion_terms.extend(synonyms[:3])
+
+    seen = set()
+    unique_expansions = []
+    for term in expansion_terms:
+        term_lower = term.lower()
+        if term_lower not in seen:
+            seen.add(term_lower)
+            unique_expansions.append(term)
+
+    expanded = f"{query} {' '.join(unique_expansions[:5])}"
+    logging.debug(f"Expansão glossário: {len(matches)} correspondência(s) encontrada(s)")
+    logging.debug(f"Termos expandidos: {unique_expansions[:5]}")
+    return expanded
 
 
 # ============================================================================
@@ -602,11 +520,6 @@ def _extract_text_pypdf(filepath):
     except Exception as e:
         logging.error(f'Erro ao extrair PDF {filepath}: {e}')
     return documents
-
-
-def _extract_table_text_fitz(page, page_num):
-    """Legacy function - now disabled, tables extracted via text extraction"""
-    return '', 'none'
 
 
 def load_pdfs_improved(directory):
@@ -740,7 +653,19 @@ class ReRankingRetriever:
         
         if cross_encoder is None:
             logging.info("Reranker desabilitado, retornando documentos da busca vetorial")
-            return initial_docs[:self.top_k]
+            top_docs = initial_docs[:self.top_k]
+            # Sem cross-encoder não há score de reranking, mas ainda precisamos
+            # marcar source_type/retrieval_score - sem isso, query_documents()
+            # trata todo documento como 'Desconhecido' e a confiança da resposta
+            # sai sempre "baixa", mesmo quando o conteúdo vem 100% de PDF.
+            for doc in top_docs:
+                if not hasattr(doc, 'metadata') or doc.metadata is None:
+                    doc.metadata = {}
+                source = doc.metadata.get('source', 'desconhecido')
+                is_pdf = 'pdf' in source.lower() or source.endswith('.pdf')
+                doc.metadata.setdefault('source_type', 'PDF' if is_pdf else 'Modelo')
+                doc.metadata.setdefault('retrieval_score', 1.0)
+            return top_docs
 
         pairs = [(query, re.sub(r'^passage: ', '', doc.page_content)) for doc in initial_docs]
         scores = cross_encoder.predict(pairs)
@@ -855,12 +780,12 @@ def query_documents(question):
                 content = doc.page_content.strip()
                 source_type = doc.metadata.get('source_type', 'Desconhecido') if hasattr(doc, 'metadata') else 'Desconhecido'
                 score = doc.metadata.get('retrieval_score', 0.0) if hasattr(doc, 'metadata') else 0.0
-                if total_chars + len(content) <= MAX_CONTEXT_TOKENS:
+                if total_chars + len(content) <= MAX_CONTEXT_CHARS:
                     context_parts.append(content)
                     source_indicators.append(f"[{source_type} | Score: {score:.2f}]")
                     total_chars += len(content)
                 else:
-                    remaining_chars = MAX_CONTEXT_TOKENS - total_chars
+                    remaining_chars = MAX_CONTEXT_CHARS - total_chars
                     if remaining_chars > 100:
                         context_parts.append(content[:remaining_chars] + "...[TRUNCADO]")
                         source_indicators.append(f"[{source_type} | Score: {score:.2f} | TRUNCADO]")
@@ -1053,44 +978,53 @@ def initialize_rag():
         raise
 
 
+def is_rag_initialized() -> bool:
+    """Reflete o estado real de inicialização do RAG (sem forçar init)."""
+    return retriever is not None
+
+
 # ============================================================================
 # TRANSCRIÇÃO DE ÁUDIO COM GROQ WHISPER
 # ============================================================================
 
-def transcribe_audio(audio_file_path: str) -> str:
+def transcribe_audio(audio_file_path: str, mime_type: str = None) -> str:
     """
     Transcreve um arquivo de áudio usando Groq Whisper
-    
+
     Args:
         audio_file_path: Caminho para o arquivo de áudio (mp3, wav, m4a, etc)
-        
+        mime_type: Content-Type real do áudio recebido (ex: "audio/webm"),
+            repassado à Groq em vez de um valor fixo, já que o arquivo é
+            salvo em disco com um nome temporário sem extensão real.
+
     Returns:
         str: Texto transcrito
-        
+
     Raises:
         Exception: Se houver erro na transcrição
     """
     try:
         logging.info(f"🎤 Iniciando transcrição de áudio: {audio_file_path}")
-        
+
+        if not os.path.exists(audio_file_path):
+            raise FileNotFoundError(audio_file_path)
+
         # Usar lazy loading do Groq client
         client = ModelManager.get_groq_client()
-        
-        # Abrir arquivo de áudio
+
         with open(audio_file_path, "rb") as audio_file:
-            # Usar Groq Whisper para transcrição
             transcript = client.audio.transcriptions.create(
-                file=(audio_file_path.split('/')[-1], audio_file, "audio/mpeg"),
+                file=(audio_file_path.split('/')[-1], audio_file, mime_type or "audio/mpeg"),
                 model="whisper-large-v3-turbo",
                 language="pt"  # Português
             )
-        
+
         text = transcript.text
         logging.info(f"✅ Áudio transcrito com sucesso: {len(text)} caracteres")
         logging.info(f"📝 Texto: {text[:100]}...")
-        
+
         return text
-        
+
     except FileNotFoundError:
         error_msg = f"Arquivo de áudio não encontrado: {audio_file_path}"
         logging.error(f"❌ {error_msg}")
@@ -1101,19 +1035,21 @@ def transcribe_audio(audio_file_path: str) -> str:
         raise Exception(error_msg)
 
 
-def process_audio_and_answer(audio_file_path: str) -> dict:
+def process_audio_and_answer(audio_file_path: str, mime_type: str = None) -> dict:
     """
     Processa um arquivo de áudio e gera uma resposta
-    
+
     Args:
         audio_file_path: Caminho para o arquivo de áudio
-        
+        mime_type: Content-Type real do áudio recebido, repassado para
+            transcribe_audio() (ver docstring de transcribe_audio)
+
     Returns:
         dict: Resultado com response, sources, docs_used, confidence, etc
     """
     try:
         # 1. Transcrever áudio
-        question = transcribe_audio(audio_file_path)
+        question = transcribe_audio(audio_file_path, mime_type=mime_type)
         
         # 2. Processar pergunta normalmente
         result = hierarchical_search_and_generate(question)

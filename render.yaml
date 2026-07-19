@@ -2,13 +2,16 @@ services:
   - type: web
     name: metaverso-rag
     runtime: docker
-    dockerfilePath: ./Dockerfile
-    
+    dockerfilePath: ./metaverso/Dockerfile
+    dockerContext: ./metaverso
+
     envVars:
       - key: GROQ_API_KEY
         sync: false
       - key: API_KEY
         sync: false
+      - key: PDF_DIR
+        value: /app/Data
       - key: CHROMA_PERSIST_DIR
         value: /var/data/chroma
 

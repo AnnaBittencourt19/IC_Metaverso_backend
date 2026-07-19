@@ -1,0 +1,15 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+.env
+.env.render
+.DS_Store
+.gitkeep
+
+chroma_db_export/
+docs/
+notebooks/
+scripts/
+tests/
+config/

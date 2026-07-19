@@ -12,7 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from app.config import EAGER_RAG_INIT, REQUEST_TIMEOUT_SECONDS
-from app.rag import hierarchical_search_and_generate, initialize_rag, process_audio_and_answer
+from app.rag import hierarchical_search_and_generate, initialize_rag, process_audio_and_answer, is_rag_initialized
 
 # ============================================================================
 # Configuração de Logging
@@ -73,7 +73,9 @@ app.add_middleware(
 # Autenticação via API Key
 # ============================================================================
 
-API_KEY = os.getenv("API_KEY", "metaverso-secret-key-2026")
+API_KEY = os.getenv("API_KEY")
+if not API_KEY:
+    logger.warning("API_KEY não está definida - todas as requisições autenticadas serão rejeitadas")
 
 def verify_api_key(x_api_key: Optional[str] = Header(None)) -> str:
     """Valida a chave de API fornecida no header"""
@@ -216,7 +218,7 @@ async def health():
     logger.debug("GET /api/v1/health - Health check")
     return HealthResponse(
         status="healthy",
-        rag_initialized=True
+        rag_initialized=is_rag_initialized()
     )
 
 
@@ -349,13 +351,13 @@ async def ask_audio(
 ) -> AudioResponse:
     """
     Processa um arquivo de áudio, transcreve com Groq Whisper e gera resposta
-    
+
     **Formatos de áudio suportados:**
     - MP3, WAV, M4A, FLAC, OGG, etc
-    
+
     **Headers obrigatórios:**
     - `X-API-Key`: Chave de autenticação da API
-    
+
     **Fluxo:**
     1. Recebe arquivo de áudio
     2. Transcreve com Groq Whisper (português)
@@ -385,28 +387,35 @@ async def ask_audio(
                 detail=f"Erro ao inicializar sistema RAG: {str(e)}"
             )
         
+        # mime_type real do áudio, repassado à Groq no upload (o arquivo
+        # temporário abaixo é salvo com suffix=".audio", uma extensão que não
+        # permite inferir o tipo automaticamente). Extraído antes da validação
+        # porque navegadores mandam Content-Type com parâmetros, ex:
+        # "audio/webm;codecs=opus", que não bate com igualdade exata.
+        audio_mime_type = (audio_file.content_type or "audio/mpeg").split(";")[0].strip()
+
         # Validar tipo de arquivo
         allowed_audio_types = [
             "audio/mpeg", "audio/wav", "audio/mp4", "audio/ogg",
             "audio/flac", "audio/webm", "audio/x-m4a"
         ]
-        
-        if audio_file.content_type not in allowed_audio_types:
+
+        if audio_mime_type not in allowed_audio_types:
             logger.warning(f"Tipo de arquivo não suportado: {audio_file.content_type}")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Tipo de arquivo não suportado: {audio_file.content_type}. Use MP3, WAV, M4A, FLAC, OGG, etc"
             )
-        
+
         # Salvar arquivo temporário
         with tempfile.NamedTemporaryFile(delete=False, suffix=".audio") as tmp_file:
             contents = await audio_file.read()
             tmp_file.write(contents)
             tmp_file_path = tmp_file.name
-        
+
         try:
             # Processar áudio
-            result = process_audio_and_answer(tmp_file_path)
+            result = process_audio_and_answer(tmp_file_path, mime_type=audio_mime_type)
             
             # Extrair informações
             docs = result.get('docs', [])
