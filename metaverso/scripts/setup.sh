@@ -12,8 +12,8 @@ echo ""
 
 # 1. Criar ambiente virtual
 echo "1️⃣  Criando ambiente virtual..."
-if [ ! -d "venv" ]; then
-    python3 -m venv venv
+if [ ! -d ".venv" ]; then
+    python3 -m venv .venv
     echo "   ✅ Ambiente virtual criado"
 else
     echo "   ✅ Ambiente virtual já existe"
@@ -22,7 +22,7 @@ fi
 # 2. Ativar ambiente virtual
 echo ""
 echo "2️⃣  Ativando ambiente virtual..."
-source venv/bin/activate || . venv/Scripts/activate
+source .venv/bin/activate || . .venv/Scripts/activate
 echo "   ✅ Ambiente ativado"
 
 # 3. Instalar dependências
@@ -36,7 +36,7 @@ echo "   ✅ Dependências instaladas"
 echo ""
 echo "4️⃣  Configurando variáveis de ambiente..."
 if [ ! -f ".env" ]; then
-    cp .env.example .env
+    cp config/.env.example .env
     echo "   ✅ Arquivo .env criado (edite com sua GROQ_API_KEY)"
     echo ""
     echo "   ⚠️  IMPORTANTE: Edite .env e adicione sua chave Groq:"
@@ -48,14 +48,14 @@ fi
 # 5. Criar diretório de PDFs
 echo ""
 echo "5️⃣  Preparando diretórios..."
-mkdir -p pdfs
-mkdir -p chroma_db
+mkdir -p Data
+mkdir -p chroma_db_export
 echo "   ✅ Diretórios criados"
 
 # 6. Testar configuração
 echo ""
 echo "6️⃣  Testando configuração..."
-python test_config.py
+python tests/test_config.py
 
 # 7. Instruções finais
 echo ""
@@ -68,16 +68,13 @@ echo ""
 echo "1. Edite o arquivo .env e adicione sua GROQ_API_KEY:"
 echo "   nano .env"
 echo ""
-echo "2. Copie seus PDFs para o diretório 'pdfs/':"
-echo "   cp ~/Downloads/*.pdf pdfs/"
+echo "2. Copie seus PDFs para o diretório 'Data/':"
+echo "   cp ~/Downloads/*.pdf Data/"
 echo ""
-echo "3. Execute a ingestão de PDFs:"
-echo "   python -m app.ingest ingest"
-echo ""
-echo "4. Inicie o servidor:"
+echo "3. Inicie o servidor (a ingestão roda automaticamente na 1ª pergunta):"
 echo "   uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"
 echo ""
-echo "5. Acesse a API em http://localhost:8000"
-echo "   Swagger UI: http://localhost:8000/docs"
+echo "4. Acesse a API em http://localhost:8000"
+echo "   Swagger UI: http://localhost:8000/api/v1/docs"
 echo ""
 echo "=========================================="

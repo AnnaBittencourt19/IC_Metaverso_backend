@@ -42,10 +42,11 @@ env/
 *~
 .DS_Store
 
-# ChromaDB (apenas pasta local de dev, não a exportada para produção)
+# ChromaDB (gerado em build_ingest.py durante o build do Docker, não precisa
+# ser versionado — ver Dockerfile: RUN python build_ingest.py)
 chroma_db/
+chroma_db_export/
 *.db
-# NÃO ignorar chroma_db_export/ - necessário para o deploy
 
 # PDFs for testing
 pdfs/
