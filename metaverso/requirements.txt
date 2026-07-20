@@ -13,6 +13,14 @@ langchain-chroma==1.1.0
 langchain-text-splitters==1.1.2
 langchain-core==1.3.0
 
+# torch é dependência transitiva do sentence-transformers; sem pin, pip
+# resolve o wheel padrão do PyPI com todo o stack CUDA (~1.5GB extras de
+# libs nvidia-*) mesmo não havendo GPU no Render, e só o import de torch já
+# empurra o RSS do processo para perto/acima dos 512MB do free tier no
+# startup do uvicorn. Fixando explicitamente o wheel +cpu do índice oficial
+# do PyTorch evita isso.
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.13.0+cpu
 sentence-transformers==5.4.1
 transformers==5.5.4
 huggingface-hub==1.11.0
