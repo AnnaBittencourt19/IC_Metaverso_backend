@@ -13,7 +13,11 @@ services:
       - key: PDF_DIR
         value: /app/Data
       - key: CHROMA_PERSIST_DIR
-        value: /var/data/chroma
+        # O Dockerfile já roda build_ingest.py no build e grava o índice em
+        # /app/chroma_db_export dentro da própria imagem — apontar para o
+        # disco persistente (vazio) fazia o app tentar reingestar do zero
+        # a cada request e travar/OOM.
+        value: /app/chroma_db_export
 
 disks:
   - name: chroma-data
