@@ -20,4 +20,14 @@ claude
 - ```/compact```: Analisa a conversa toda, mantém as informações mais importantes (para diminuir o tamanho do contexto)
 - ```/clear```: Começar uma nova conversa/sessão
 - ```/resume```: Ver históricos de conversa
-- Documento ```claude.md```: 
+- Documento ```claude.md```: Arquivo que contém informações sobre os meus objetivos, sobre a minha estrutura de pastas, sobre os meus documentos, informações relevantes para o claude quando ele abre aquela pasta. Existem dois níveis:
+	- Primeiro nível: O que está na pasta do projeto que vai ser aberto
+	- Segundo nível: Oculta na pasta .claude na pasta raíz do usuário (é carregado em todas as pastas)
+	- Primeiro nível é como se fosse um prompt injetado naquela pasta e o segundo nível injetado em todas 
+	- O comando ```/init``` inicializa o arquivo claude.md de maneira automática 
+- Protocolo de MCPs: Permite conectar com outras ferramentas (ex; gmail, calendário, notion, figma...)
+	- Excaldraw: Fazer desenhos, planejar melhor (mockup)
+- ```@```: Marcar uma pasta
+- Claude é muito bom para fazer dashboards
+- Skills: Arquivo markdown que instrui o claude a fazer alguma coisa e diz quando o claude deve usar ele, só lê a skill quando acha que ela tem haver com o contexto. Pode ser criado a mão ou usar skills prontas na internet. Colar link e pedir para baixar a skill
+- Sub Agents: Pede pra ele usar uma skill e em paralelo suba N sub Agents para trabalhar em paralelo
